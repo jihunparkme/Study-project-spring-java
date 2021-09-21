@@ -1,7 +1,9 @@
 package baseball;
 
+import baseball.domain.Judgment;
 import baseball.domain.NumberGenerator;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,5 +17,13 @@ public class Application {
         NumberGenerator generator = new NumberGenerator();
         List<Integer> randomNumbers = generator.createRandomNumbers();
         System.out.println("randomNumbers = " + randomNumbers);
+
+        Judgment judgment = new Judgment();
+        int count = judgment.correctCount(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3));
+        System.out.println("count = " + count);
+
+        boolean place = judgment.hasPlace(Arrays.asList(7, 8, 9), 0, 7);
+        System.out.println("place = " + place);
+        
     }
 }
