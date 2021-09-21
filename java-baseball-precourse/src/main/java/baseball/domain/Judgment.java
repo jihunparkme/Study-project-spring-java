@@ -10,7 +10,7 @@ public class Judgment {
                 result++;
             }
         }
-        return 0;
+        return result;
     }
 
     public boolean hasPlace(List<Integer> computer, int placeIndex, int number) {
