@@ -1,12 +1,13 @@
 package vendingMachine;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Red(질문) -> Green(응답) -> Refactor(정제)
@@ -36,5 +37,18 @@ class VendingMachineTest {
         VendingMachine vendingMachine = new VendingMachine(1000);
         vendingMachine.put(500);
         assertThat(vendingMachine.getChanges()).isEqualTo(1500);
+    }
+
+    @Test
+    void _500이_들어있는_자판기_500원을_차감하면_0원이_된다() {
+        VendingMachine vendingMachine = new VendingMachine(500);
+        vendingMachine.withdraw(500);
+        assertThat(vendingMachine.getChanges()).isEqualTo(0);
+    }
+
+    @Test
+    void _0원이_들어있는_자판기_500원을_차감할_수_없다() {
+        VendingMachine vendingMachine = new VendingMachine(0);
+        assertThatIllegalStateException().isThrownBy(() -> vendingMachine.withdraw(500));
     }
 }
