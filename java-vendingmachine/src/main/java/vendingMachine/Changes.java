@@ -1,28 +1,24 @@
 package vendingMachine;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Changes {
-    private int value;
+    private int amount;
 
     public Changes(int value) {
-        this.value = value;
+        this.amount = value;
     }
 
     List<CoinSet> coin() {
-        if (this.value == 10) {
-            return Arrays.asList(CoinSet._10_COIN);
+        List<CoinSet> list = new ArrayList<>();
+        for (CoinSet coin : CoinSet.highestOrder()) {
+            final int count = amount / coin.value;
+            for (int i = 0; i < count; i++) {
+                list.add(coin);
+            }
+            amount = amount - (count * coin.value);
         }
-        if (this.value == 50) {
-            return Arrays.asList(CoinSet._50_COIN);
-        }
-        if (this.value == 100) {
-            return Arrays.asList(CoinSet._100_COIN);
-        }
-        if (this.value == 500) {
-            return Arrays.asList(CoinSet._500_COIN);
-        }
-        return Arrays.asList();
+        return list;
     }
 }
