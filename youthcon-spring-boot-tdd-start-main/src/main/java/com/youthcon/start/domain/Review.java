@@ -1,4 +1,4 @@
-package com.youthcon.start;
+package com.youthcon.start.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,15 +13,22 @@ public class Review {
     private Long id;
     private String content;
     private String phoneNumber;
+    private Boolean sent;
 
-    public Review(long id, String content, String phoneNumber) {
+    public Review() {
+    }
+
+    public Review(Long id, String content, String phoneNumber) {
         this.id = id;
         this.content = content;
         this.phoneNumber = phoneNumber;
     }
 
-    public Review() {
-
+    public Review(Long id, String content, String phoneNumber, Boolean isSent) {
+        this.id = id;
+        this.content = content;
+        this.phoneNumber = phoneNumber;
+        this.sent = isSent;
     }
 
     public Long getId() {
@@ -34,5 +41,13 @@ public class Review {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public Boolean getSent() {
+        return sent;
+    }
+
+    public void makeTrue() {
+        this.sent = true;
     }
 }

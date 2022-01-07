@@ -1,4 +1,4 @@
-package com.youthcon.start;
+package com.youthcon.start.config;
 
 import org.springframework.stereotype.Component;
 

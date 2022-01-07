@@ -1,14 +1,15 @@
 package com.youthcon.start;
 
+import com.youthcon.start.application.ReviewService;
+import com.youthcon.start.domain.Review;
+import com.youthcon.start.error.ReviewNotFoundException;
+import com.youthcon.start.ui.ReviewController;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -64,5 +65,19 @@ public class ReviewControllerTest {
         //then
         perform
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 선물하기_성공() throws Exception {
+        //given
+        given(reviewService.sendGift(id)).willReturn(new Review(id, content, phoneNumber, true));
+
+        //when
+        ResultActions perform = mockMvc.perform(get("/reviews/" + id));
+
+        //then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("isSent").value(true));
     }
 }

@@ -71,7 +71,16 @@ class AcceptanceTest {
     }
 
     @Test
-    void 선물하기_성공() {
-
+    void 선물하기(){
+        // 준비
+        given()
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        // 실행
+        .when()
+                .put("/reviews/2")
+        // 검증
+        .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("sent", equalTo(true));
     }
 }
