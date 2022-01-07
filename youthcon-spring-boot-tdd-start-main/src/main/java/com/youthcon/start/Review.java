@@ -20,6 +20,10 @@ public class Review {
         this.phoneNumber = phoneNumber;
     }
 
+    public Review() {
+
+    }
+
     public Long getId() {
         return id;
     }
