@@ -20,8 +20,14 @@ package com.youthcon.start;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AcceptanceTest {
@@ -32,5 +38,32 @@ class AcceptanceTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    @Test
+    void 후기_조회_성공() {
+        //given, arrange, 준비
+        given()
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        //when, act, 실행
+        .when()
+                .get("/reviews/1")
+        //then, assert, 검증
+        .then()
+                .statusCode(HttpStatus.OK.value())
+                .assertThat()
+                .body("id", equalTo(1))
+                .body("content", equalTo("재밌어요"))
+                .body("phoneNumber", equalTo("010-1111-2222"));
+    }
+
+    @Test
+    void 후기_조회_실패() {
+
+    }
+
+    @Test
+    void 선물하기_성공() {
+
     }
 }
