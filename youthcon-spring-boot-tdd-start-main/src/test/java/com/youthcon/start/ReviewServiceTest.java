@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ReviewServiceTest {
 
+    ReviewRepository reviewRepository;
     ReviewService reviewService = new ReviewService();
 
     @Test
