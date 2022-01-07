@@ -50,12 +50,11 @@ class ReviewServiceTest {
     @Test
     void 후기_조회_실패() {
         //given
-        given(reviewRepository.findById(1000L))
-                .willReturn(Optional.empty());
+        given(reviewRepository.findById(1000L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 //when
-                reviewRepository.getById(1000L))
+                reviewService.getById(1000L))
                 //then
                 .isInstanceOf(ReviewNotFoundException.class);
     }

@@ -31,12 +31,12 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ReviewNotFoundException("no review id : " + id));
 
-        if (review.getSent()) {
+        if (review.getSent()){
             throw new DuplicateSendGiftException("duplicate review id : " + id);
         }
 
-        if (!giftApi.send(review.getPhoneNumber())) {
-            throw new SendGiftInternalException("Internal excaption");
+        if (!giftApi.send(review.getPhoneNumber())){
+            throw new SendGiftInternalException("internal exception");
         }
 
         review.makeTrue();

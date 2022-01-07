@@ -10,6 +10,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * @DataJpaTest : JPA 관련 테스트 설정만 로드
+ */
 @DataJpaTest
 class ReviewRepositoryTest {
 

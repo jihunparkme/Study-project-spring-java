@@ -73,11 +73,11 @@ public class ReviewControllerTest {
         given(reviewService.sendGift(id)).willReturn(new Review(id, content, phoneNumber, true));
 
         //when
-        ResultActions perform = mockMvc.perform(get("/reviews/" + id));
+        ResultActions perform = mockMvc.perform(put("/reviews/" + id));
 
         //then
         perform
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("isSent").value(true));
+                .andExpect(jsonPath("sent").value(true));
     }
 }
