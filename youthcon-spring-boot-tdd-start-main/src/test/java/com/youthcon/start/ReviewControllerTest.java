@@ -52,4 +52,17 @@ public class ReviewControllerTest {
                 .andExpect(jsonPath("phoneNumber").value(phoneNumber));
     }
 
+    @Test
+    void 후기_조회_실패() throws Exception {
+        //given
+        given(reviewService.getById(1000L))
+                .willThrow(new ReviewNotFoundException("no review id : " + 1000));
+
+        //when
+        ResultActions perform = mockMvc.perform(get("/reviews/" + 1000));
+
+        //then
+        perform
+                .andExpect(status().isNotFound());
+    }
 }

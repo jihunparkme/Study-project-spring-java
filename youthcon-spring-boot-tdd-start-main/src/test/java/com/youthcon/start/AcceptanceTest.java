@@ -59,7 +59,15 @@ class AcceptanceTest {
 
     @Test
     void 후기_조회_실패() {
-
+        //given, arrange, 준비
+        given()
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+        //when, act, 실행
+        .when()
+                .get("/reviews/1000")
+        //then, assert, 검증
+        .then()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     @Test

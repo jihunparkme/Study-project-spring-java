@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -35,5 +36,16 @@ class ReviewServiceTest {
         assertThat(review.getId()).isEqualTo(id);
         assertThat(review.getContent()).isEqualTo(content);
         assertThat(review.getPhoneNumber()).isEqualTo(phoneNumber);
+    }
+
+    @Test
+    void 후기_조회_실패() {
+        //given
+        given(reviewRepository.findById(1000L))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                reviewRepository.getById(1000L))
+                .isInstanceOf(ReviewNotFoundException.class);
     }
 }

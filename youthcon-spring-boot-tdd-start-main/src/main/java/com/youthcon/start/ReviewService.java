@@ -13,6 +13,6 @@ public class ReviewService {
 
     public Review getById(long id) {
         return reviewRepository.findById(id)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new ReviewNotFoundException("no review: " + id));
     }
 }
