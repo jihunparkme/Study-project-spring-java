@@ -1,4 +1,4 @@
-GET http://localhost:8080/user/youthcon@gmail.com
+GET http://localhost:8080/user/jihunpark.tech@gmail.com
 Accept: application/json
 
 ###
@@ -6,8 +6,8 @@ POST http://localhost:8080/user
 Content-Type: application/json
 
 {
-  "name" : "youthcon",
-  "email" : "youthcon@gmail.com",
-  "phoneNumber" : "010-1234-5784"
+  "name" : "jihunpark",
+  "email" : "jihunpark.tech@gmail.com",
+  "phoneNumber" : "010-1234-1234"
 }
 
