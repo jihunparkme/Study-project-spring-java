@@ -1,7 +1,5 @@
 package com.youthcon21.handsonlab.springevent.user.event;
 
-import org.springframework.context.ApplicationEvent;
-
 public class UserCouponEvent {
     private final String email;
 
