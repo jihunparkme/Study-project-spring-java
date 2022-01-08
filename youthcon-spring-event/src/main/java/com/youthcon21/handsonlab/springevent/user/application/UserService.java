@@ -1,6 +1,5 @@
 package com.youthcon21.handsonlab.springevent.user.application;
 
-import com.youthcon21.handsonlab.springevent.sender.application.SenderService;
 import com.youthcon21.handsonlab.springevent.user.domain.User;
 import com.youthcon21.handsonlab.springevent.user.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -13,12 +12,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final SenderService senderService;
 
-    public UserService(UserRepository userRepository, ApplicationEventPublisher eventPublisher, SenderService senderService) {
+    public UserService(UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
-        this.senderService = senderService;
     }
 
     public void create(UserRequest userRequest) {
@@ -30,8 +27,6 @@ public class UserService {
         userRepository.save(user);
 
         user.registerEventPublish(eventPublisher);
-        senderService.sendSMS(user.getPhoneNumber());
-        senderService.sendEmail(user.getEmail());
     }
 
     public UserResponse get(String email) {
