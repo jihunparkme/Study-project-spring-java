@@ -1,5 +1,16 @@
 package com.youthcon.start;
 
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
 /*
 시나리오
 - 리뷰를 조회할 수 있게 해주세요.
@@ -18,20 +29,19 @@ package com.youthcon.start;
 - [ ] 선물하기는 아래의 API를 호출하여 수행합니다.
  */
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * 인수 테스트 : 실제 사용자 환경에서 사용자의 입장으로 테스트를 수행
+ *
+ * @SpringBootTest : 인수 테스트에서는 최대한 많은 자원을 활용하는 것이 좋음.
+ * WebEnvironment.RANDOM_PORT : embedded tomcat 을 띄워서 실제 운영 환경과 동일한 환경 구축
+ *                              (테스트 환경에서 PORT 가 충돌하지 않도록 지원)
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AcceptanceTest {
 
+    /**
+     * RANDOM_PORT 사용 시 @LocalServerPort 를 통해 port 확인
+     */
     @LocalServerPort
     int port;
 
