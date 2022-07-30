@@ -11,4 +11,20 @@ public class Point {
         this.x = new Coordinate(x);
         this.y = new Coordinate(y);
     }
+
+    public int getX() {
+        return x.getNum();
+    }
+
+    public double getDoubleX() {
+        return x.getNum() * 1.0;
+    }
+
+    public int getY() {
+        return y.getNum();
+    }
+
+    public double getDoubleY() {
+        return y.getNum() * 1.0;
+    }
 }
