@@ -3,7 +3,7 @@ package model;
 import lombok.Getter;
 
 @Getter
-public class Point {
+public class Point implements Figure {
     private final Coordinate x;
     private final Coordinate y;
 

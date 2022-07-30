@@ -1,6 +1,6 @@
 package model;
 
-public class Line {
+public class Line implements Figure {
     private Point pointA;
     private Point pointB;
 
