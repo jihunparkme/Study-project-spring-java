@@ -1,8 +1,10 @@
 package model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
+@EqualsAndHashCode
 public class Coordinate {
 
     private static final int MIN_VALUE = 1;
@@ -19,5 +21,7 @@ public class Coordinate {
     private boolean verifyScope(int num) {
         return num < MIN_VALUE || num > MAX_VALUE;
     }
+
+
 }
 
