@@ -28,4 +28,16 @@ public class Point {
     private boolean exceedRange(int coordinate) {
         return coordinate < MIN_VALUE || coordinate > MAX_VALUE;
     }
+
+    public boolean isSame(int x, int y) {
+        return this.x == x && this.y == y;
+    }
+
+    public double calculateDistance(Point point) {
+        return Math.sqrt(squareDifference(this.x, point.x) + squareDifference(this.y, point.y));
+    }
+
+    private double squareDifference(int firstValue, int secondValue) {
+        return Math.pow(firstValue - secondValue, 2);
+    }
 }
