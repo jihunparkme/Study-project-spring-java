@@ -12,14 +12,13 @@ import static java.util.stream.Collectors.toSet;
 
 @Getter
 @EqualsAndHashCode
-public class Rectangle {
+public class Rectangle extends AbstractFigure {
     private static final String ERROR_INVALID_RECTANGLE = "직사각형 모양이 아닙니다.";
     private static final String OUTPUT_AREA_OF_RECTANGLE = "사각형의 넓이는 ";
     private static final int NUM_OF_TYPES_OF_RECTANGLE_COORDINATES = 2;
-    private final List<Point> points;
 
     public Rectangle(List<Point> points) {
-        this.points = points;
+        super(points);
         checkRectangleWith(points);
     }
 
@@ -50,6 +49,7 @@ public class Rectangle {
         return valuesOfPoints.size() != NUM_OF_TYPES_OF_RECTANGLE_COORDINATES;
     }
 
+    @Override
     public double area() {
         List<Point> points = getPoints();
         int differenceOfXValues = calculateDifference(convertToUniqueXValues(points));
@@ -63,12 +63,8 @@ public class Rectangle {
         return Math.abs(values.get(0) - values.get(1));
     }
 
+    @Override
     public String getAreaInfo() {
         return OUTPUT_AREA_OF_RECTANGLE + area();
-    }
-
-    public boolean hasPoint(int x, int y) {
-        return getPoints().stream()
-                .anyMatch(point -> point.isSame(x, y));
     }
 }

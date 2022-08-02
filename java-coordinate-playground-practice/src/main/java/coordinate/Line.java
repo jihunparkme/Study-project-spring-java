@@ -5,19 +5,19 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class Line {
-    private final List<Point> points;
+public class Line extends AbstractFigure {
 
-    public Line(List<Point> points) {
-        this.points = points;
+    Line(List<Point> points) {
+        super(points);
     }
 
-    public boolean hasPoint(int x, int y) {
-        return getPoints().stream()
-                .anyMatch(point -> point.isSame(x, y));
-    }
-
+    @Override
     public double area() {
         return getPoints().get(0).calculateDistance(getPoints().get(1));
+    }
+
+    @Override
+    public String getAreaInfo() {
+        throw new UnsupportedOperationException("Line#getAreaInfo not implemented yet !!");
     }
 }
