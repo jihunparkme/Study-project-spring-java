@@ -2,7 +2,6 @@ package coordinate;
 
 import org.junit.jupiter.api.*;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class RectangleTest {
 
     @BeforeEach
     void setUp() {
-        List<Point> points = Arrays.asList(new Point(10, 10), new Point(22, 10), new Point(22, 18), new Point(10, 18));
+        points = Arrays.asList(new Point(10, 10), new Point(22, 10), new Point(22, 18), new Point(10, 18));
         rectangle = new Rectangle(points);
     }
 
@@ -45,7 +44,7 @@ public class RectangleTest {
     @Test
     @DisplayName("직사각형 넓이 계산")
     void calculate_rectangle() throws Exception {
-        assertThat(rectangle.area()).isEqualTo(28);
+        assertThat(rectangle.area()).isEqualTo(96);
     }
 
     @AfterEach
