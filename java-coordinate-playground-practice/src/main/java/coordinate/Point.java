@@ -29,8 +29,11 @@ public class Point {
         return coordinate < MIN_VALUE || coordinate > MAX_VALUE;
     }
 
-    public boolean isSame(int x, int y) {
-        return this.x == x && this.y == y;
+    public double calculateSlope(Point point) {
+        if (this.x == point.x) {
+            return Double.MAX_VALUE;
+        }
+        return Math.abs((double) (this.y - point.y) / (this.x - point.x));
     }
 
     public double calculateDistance(Point point) {
@@ -39,5 +42,9 @@ public class Point {
 
     private double squareDifference(int firstValue, int secondValue) {
         return Math.pow(firstValue - secondValue, 2);
+    }
+
+    public boolean isSame(int x, int y) {
+        return this.x == x && this.y == y;
     }
 }
