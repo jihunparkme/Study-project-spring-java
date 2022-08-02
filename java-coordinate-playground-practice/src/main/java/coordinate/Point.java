@@ -7,9 +7,9 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class Point {
     private static final String ERROR_OUT_OF_POINT_RANGE
-            = "잘못된 범위의 입력값입니다. 정수 범위는 " + Point.MIN_VALUE + " ~ " + Point.MAX_VALUE + " 사이의 수로 입력해 주세요.";
-    private static final int MIN_VALUE = 1;
-    private static final int MAX_VALUE = 24;
+            = "잘못된 범위의 입력값입니다. 정수 범위는 " + Point.LOWER_LIMIT + " ~ " + Point.UPPER_LIMIT + " 사이의 수로 입력해 주세요.";
+    public static final int LOWER_LIMIT = 1;
+    public static final int UPPER_LIMIT = 24;
     private final int x;
     private final int y;
 
@@ -26,7 +26,7 @@ public class Point {
     }
 
     private boolean exceedRange(int coordinate) {
-        return coordinate < MIN_VALUE || coordinate > MAX_VALUE;
+        return coordinate < LOWER_LIMIT || coordinate > UPPER_LIMIT;
     }
 
     public double calculateSlope(Point point) {
