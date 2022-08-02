@@ -1,6 +1,7 @@
 package controller;
 
 import coordinate.Figure;
+import view.InputView;
 
 public class CoordinateCalculator {
     public void run() {
