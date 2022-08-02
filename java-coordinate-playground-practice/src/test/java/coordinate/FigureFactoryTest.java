@@ -2,6 +2,7 @@ package coordinate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -19,14 +20,16 @@ class FigureFactoryTest {
     }
 
     @Test
-    void null_입력에_대한_예외처리() {
+    @DisplayName("Null을 입력할 경우")
+    void input_null_exception() {
         assertThrows(IllegalArgumentException.class, () -> {
             FigureFactory.create(null);
         });
     }
 
     @Test
-    void Point_1개_입력에_대한_예외처리() {
+    @DisplayName("포인트를 한 개 입력할 경우")
+    void input_one_point_exception() {
         points.add(new Point(1, 2));
         assertThrows(IllegalArgumentException.class, () -> {
             FigureFactory.create(points);
@@ -34,7 +37,8 @@ class FigureFactoryTest {
     }
 
     @Test
-    void Point_5개_이상_입력에_대한_예외처리() {
+    @DisplayName("포인트를 다섯 개 이상 입력할 경우")
+    void input_more_than_five_point_exception() {
         points.add(new Point(1, 2));
         points.add(new Point(3, 5));
         points.add(new Point(5, 6));
@@ -46,14 +50,16 @@ class FigureFactoryTest {
     }
 
     @Test
-    void Point가_2개일_경우_Line_생성() {
+    @DisplayName("포인트가 두 개일 경우 Line 생성")
+    void generate_line_if_input_tow_point() {
         points.add(new Point(1, 2));
         points.add(new Point(3, 4));
         assertThat(FigureFactory.create(points)).isEqualTo(new Line(points));
     }
 
     @Test
-    void Point가_3개일_경우_Triangle_생성() {
+    @DisplayName("포인트가 세 개일 경우 Triangle 생성")
+    void generate_triangle_if_input_three_point() {
         points.add(new Point(1, 2));
         points.add(new Point(3, 4));
         points.add(new Point(4, 7));
@@ -61,7 +67,8 @@ class FigureFactoryTest {
     }
 
     @Test
-    void Point가_4개일_경우_Rectangle_생성() {
+    @DisplayName("포인트가 네 개일 경우 Rectangle 생성")
+    void generate_rectangle_if_input_four_point() {
         points.add(new Point(1, 2));
         points.add(new Point(3, 4));
         points.add(new Point(1, 4));
