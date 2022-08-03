@@ -1,5 +1,7 @@
 package car;
 
+import jdk.nashorn.internal.objects.annotations.Getter;
+
 public abstract class AbstractCar implements Car {
     private double distance;
     private double distancePerLiter;
@@ -9,6 +11,7 @@ public abstract class AbstractCar implements Car {
         this.distancePerLiter = distancePerLiter;
     }
 
+    @Override
     public double getChargeQuantity() {
         return distance / distancePerLiter;
     }
