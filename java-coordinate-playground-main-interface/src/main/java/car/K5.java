@@ -1,32 +1,16 @@
 package car;
 
-public class K5 implements Car {
+public class K5 extends AbstractCar {
+    private static final double DISTANCE_PER_LITER = 13;
+    private String name;
 
-    private final static String name = "K5";
-    private final static int distancePerLiter = 13;
-    private int tripDistance;
-
-    public K5(int tripDistance) {
-        this.tripDistance = tripDistance;
-    }
-
-    @Override
-    public double getDistancePerLiter() {
-        return distancePerLiter;
-    }
-
-    @Override
-    public double getTripDistance() {
-        return tripDistance;
+    public K5(double distance) {
+        super(distance, DISTANCE_PER_LITER);
+        this.name = "K5";
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public double getChargeQuantity() {
-        return getTripDistance() / getDistancePerLiter();
     }
 }

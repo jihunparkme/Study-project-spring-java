@@ -1,32 +1,16 @@
 package car;
 
-public class Avante implements Car {
+public class Avante extends AbstractCar {
+    private static final double DISTANCE_PER_LITER = 15;
+    private String name;
 
-    private final static String name = "Avante";
-    private final static int distancePerLiter = 15;
-    private int tripDistance;
-
-    public Avante(int tripDistance) {
-        this.tripDistance = tripDistance;
-    }
-
-    @Override
-    public double getDistancePerLiter() {
-        return distancePerLiter;
-    }
-
-    @Override
-    public double getTripDistance() {
-        return tripDistance;
+    public Avante(double distance) {
+        super(distance, DISTANCE_PER_LITER);
+        this.name = "Avante";
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public double getChargeQuantity() {
-        return getTripDistance() / getDistancePerLiter();
     }
 }

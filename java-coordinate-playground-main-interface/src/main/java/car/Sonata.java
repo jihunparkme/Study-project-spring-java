@@ -1,32 +1,16 @@
 package car;
 
-public class Sonata implements Car {
+public class Sonata extends AbstractCar {
+    private static final double DISTANCE_PER_LITER = 10;
+    private String name;
 
-    private final static String name = "Sonata";
-    private final static int distancePerLiter = 10;
-    private int tripDistance;
-
-    public Sonata(int tripDistance) {
-        this.tripDistance = tripDistance;
-    }
-
-    @Override
-    public double getDistancePerLiter() {
-        return distancePerLiter;
-    }
-
-    @Override
-    public double getTripDistance() {
-        return tripDistance;
+    public Sonata(double distance) {
+        super(distance, DISTANCE_PER_LITER);
+        this.name = "Sonata";
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public double getChargeQuantity() {
-        return getTripDistance() / getDistancePerLiter();
     }
 }
