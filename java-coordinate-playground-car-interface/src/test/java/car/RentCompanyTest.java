@@ -1,7 +1,12 @@
+package car;
+
+import car.Avante;
+import car.K5;
+import car.RentCompany;
+import car.Sonata;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RentCompanyTest {
     private static final String NEWLINE = System.getProperty("line.separator");
