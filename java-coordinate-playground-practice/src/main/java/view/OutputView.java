@@ -1,4 +1,4 @@
-package controller;
+package view;
 
 import coordinate.Figure;
 import coordinate.Point;
