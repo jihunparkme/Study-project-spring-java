@@ -23,6 +23,7 @@ public class SimpleJobConfiguration {
     public Job simpleJob() {
         return jobBuilderFactory.get("simpleJob") //=> simpleJob 이란 이름의 Batch Job 생성
                 .start(simpleStep1(null))
+                .next(simpleStep2(null))
                 .build();
     }
 
@@ -32,6 +33,19 @@ public class SimpleJobConfiguration {
         return stepBuilderFactory.get("simpleStep1")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>> This is Step1");
+                    log.info(">>>>> requestDate = {}", requestDate);
+                    return RepeatStatus.FINISHED;
+//                    throw new IllegalArgumentException("step1에서 실패합니다.");
+                })
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step simpleStep2(@Value("#{jobParameters[requestDate]}") String requestDate) {
+        return stepBuilderFactory.get("simpleStep2")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is Step2");
                     log.info(">>>>> requestDate = {}", requestDate);
                     return RepeatStatus.FINISHED;
                 })
