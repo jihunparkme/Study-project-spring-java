@@ -1,5 +1,13 @@
 # Spring Batch
 
+향로님 Spring Batch 가이드 보고 따라하기
+
+> [1. Spring Batch 가이드 - 배치 어플리케이션이란?](https://jojoldu.tistory.com/324)
+> [2. Spring Batch 가이드 - Batch Job 실행해보기](https://jojoldu.tistory.com/325?category=902551)
+> [3. Spring Batch 가이드 - 메타테이블엿보기](https://jojoldu.tistory.com/326)
+> [4. Spring Batch 가이드 - Spring Batch Job Flow](https://jojoldu.tistory.com/328)
+> [5. Spring Batch 가이드 - Spring Batch Scope & Job Parameter](https://jojoldu.tistory.com/330)
+
 ## 배치 기능 활성화
 
 배치기능 활성화를 위해 프로젝트 Application 클래스에 @EnableBatchProcessing 를 추가해주자.
@@ -17,9 +25,11 @@ public class SpringBatchTestApplication {
 ## Job 생성하기
 
 - Spring Batch의 모든 Job은 @Configuration으로 등록해서 사용
-
-> [2. Spring Batch 가이드 - Batch Job 실행해보기](https://jojoldu.tistory.com/325?category=902551)
-
+- `spring.batch.job.names: ${job.name:NONE}`: Program arguments로 job.name 값이 넘어오면 해당 값과 일치하는 Job만 실행
+  - `--job.name=stepNextJob`
+- 실제 운영 환경에서는 아래와 같이 배치를 실행
+  - `java -jar batch-application.jar --job.name=simpleJob`
+  
 ## DB 연동
 
 schema~.sql 파일을 활용하여 spring batch에 필요한 테이블 생성
@@ -47,7 +57,7 @@ BATCH_STEP_EXECUTION_CONTEXT
 
 Job Parameter에 따라 생성되는 테이블
 
-- Job Parameter 
+- Job Parameter
   - Spring Batch가 실행될 때 외부에서 받을 수 있는 파라미터
 - Job Parameter를 사용할 경우 Program arguments에 requestDate=20220805 추가
 - Job Parameter가 같을 경우 테이블에 기록되지 않음 -> 동일한 Job Parameter는 여러개 존재할 수 없음
@@ -80,3 +90,269 @@ BATCH_JOB_EXECUTION 테이블이 생성될 당시에 입력 받은 Job Parameter
 | 2 | STRING | requestDate | 20220805 | 1970-01-01 09:00:00.000000 | 0 | 0 | Y |
 | 3 | STRING | requestDate | 20220806 | 1970-01-01 09:00:00.000000 | 0 | 0 | Y |
 | 4 | STRING | requestDate | 20220806 | 1970-01-01 09:00:00.000000 | 0 | 0 | Y |
+
+
+## Job 구성
+
+### Step
+
+실제 Batch 작업을 수행하는 역할
+
+- Batch로 실제 처리하고자 하는 기능과 설정을 모두 포함
+
+```java
+@Slf4j //=> log 사용을 위한 lombok 어노테이션
+@RequiredArgsConstructor //=> 생성자 DI를 위한 lombok 어노테이션
+@Configuration //=> Spring Batch의 모든 Job은 @Configuration을 등록해서 사용
+public class SimpleJobConfiguration {
+    private final JobBuilderFactory jobBuilderFactory; // 생성자 DI 받음
+    private final StepBuilderFactory stepBuilderFactory; // 생성자 DI 받음
+
+    @Bean
+    public Job simpleJob() {
+        return jobBuilderFactory.get("simpleJob") //=> simpleJob 이란 이름의 Batch Job 생성
+                .start(simpleStep1(null))
+                .next(simpleStep2(null))
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step simpleStep1(@Value("#{jobParameters[requestDate]}") String requestDate) {
+        return stepBuilderFactory.get("simpleStep1")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is Step1");
+                    log.info(">>>>> requestDate = {}", requestDate);
+                    return RepeatStatus.FINISHED;
+//                    throw new IllegalArgumentException("step1에서 실패합니다.");
+                })
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step simpleStep2(@Value("#{jobParameters[requestDate]}") String requestDate) {
+        return stepBuilderFactory.get("simpleStep2")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is Step2");
+                    log.info(">>>>> requestDate = {}", requestDate);
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+}
+```
+
+### Next
+
+Step들간에 순서 혹은 처리 흐름을 제어
+
+```java
+@Slf4j
+@Configuration
+@RequiredArgsConstructor
+public class StepNextJobConfiguration {
+
+  private final JobBuilderFactory jobBuilderFactory;
+  private final StepBuilderFactory stepBuilderFactory;
+
+  @Bean
+  public Job stepNextJob() {
+    return jobBuilderFactory.get("stepNextJob")
+            .start(step1())
+            .next(step2())
+            .next(step3())
+            .build();
+  }
+
+  @Bean
+  public Step step1() {
+    return stepBuilderFactory.get("step1")
+            .tasklet((contribution, chunkContext) -> {
+              log.info(">>>>> This is Step1");
+              return RepeatStatus.FINISHED;
+            })
+            .build();
+  }
+
+  @Bean
+  public Step step2() {
+    return stepBuilderFactory.get("step2")
+            .tasklet((contribution, chunkContext) -> {
+              log.info(">>>>> This is Step2");
+              return RepeatStatus.FINISHED;
+            })
+            .build();
+  }
+
+  @Bean
+  public Step step3() {
+    return stepBuilderFactory.get("step3")
+            .tasklet((contribution, chunkContext) -> {
+              log.info(">>>>> This is Step3");
+              return RepeatStatus.FINISHED;
+            })
+            .build();
+  }
+}
+```
+
+### Flow
+
+조건별 흐름 제어
+
+- 상황에 따라 정상일때는 Step B로, 오류가 났을때는 Step C로 수행할 경우 활용
+
+```java
+@Slf4j
+@Configuration
+@RequiredArgsConstructor
+public class StepNextConditionalJobConfiguration {
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+
+    /**
+     * step1 실패 시나리오: step1 -> step3
+     * step1 성공 시나리오: step1 -> step2 -> step3
+     */
+    @Bean
+    public Job stepNextConditionalJob() {
+        return jobBuilderFactory.get("stepNextConditionalJob")
+                .start(conditionalJobStep1())
+                    .on("FAILED") // FAILED 일 경우 (캐치할 ExitStatus 지정, * 일 경우 모든 ExitStatus가 지정)
+                    .to(conditionalJobStep3()) // step3으로 이동한다. (다음으로 이동할 Step 지정)
+                    .on("*") // step3의 결과 관계 없이
+                    .end() // step3으로 이동하면 Flow가 종료한다.
+                .from(conditionalJobStep1()) // step1로부터 (상태값을 보고 일치하는 상태라면 to()에 포함된 step을 호출)
+                    .on("*") // FAILED 외에 모든 경우
+                    .to(conditionalJobStep2()) // step2로 이동한다.
+                    .next(conditionalJobStep3()) // step2가 정상 종료되면 step3으로 이동한다.
+                    .on("*") // step3의 결과 관계 없이
+                    .end() // step3으로 이동하면 Flow가 종료한다. (FlowBuilder를 반환하는 end)
+                .end() // Job 종료 (FlowBuilder를 종료하는 end)
+                .build();
+    }
+
+    @Bean
+    public Step conditionalJobStep1() {
+        return stepBuilderFactory.get("step1")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is stepNextConditionalJob Step1");
+
+                    /**
+                     ExitStatus를 FAILED로 지정한다.
+                     해당 status를 보고 flow가 진행된다.
+                     **/
+//                    contribution.setExitStatus(ExitStatus.FAILED);
+
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    public Step conditionalJobStep2() {
+        return stepBuilderFactory.get("conditionalJobStep2")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is stepNextConditionalJob Step2");
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    public Step conditionalJobStep3() {
+        return stepBuilderFactory.get("conditionalJobStep3")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is stepNextConditionalJob Step3");
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+}
+```
+
+## Decide
+
+분기 처리
+
+- Step과는 명확히 역할과 책임을 분리
+- Step들의 Flow속에서 분기만 담당하는 타입 (JobExecutionDecider)
+
+```java
+@Slf4j
+@Configuration
+@RequiredArgsConstructor
+public class DeciderJobConfiguration {
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+
+    @Bean
+    public Job deciderJob() {
+        return jobBuilderFactory.get("deciderJob")
+                .start(startStep())// Job Flow의 첫번째 Step을 시작
+                .next(decider()) // 홀수 | 짝수 구분 (startStep 이후에 decider를 실행)
+                .from(decider()) // decider의 상태가 (decider의 상태값을 보고 일치하는 상태라면 to()에 포함된 step 호출)
+                    .on("ODD") // ODD라면
+                    .to(oddStep()) // oddStep로 간다.
+                .from(decider()) // decider의 상태가
+                    .on("EVEN") // ODD라면
+                    .to(evenStep()) // evenStep로 간다.
+                .end() // builder 종료
+                .build();
+    }
+
+    @Bean
+    public Step startStep() {
+        return stepBuilderFactory.get("startStep")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> Start!");
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    public Step evenStep() {
+        return stepBuilderFactory.get("evenStep")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> 짝수입니다.");
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    public Step oddStep() {
+        return stepBuilderFactory.get("oddStep")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> 홀수입니다.");
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    public JobExecutionDecider decider() {
+        return new OddDecider();
+    }
+
+    public static class OddDecider implements JobExecutionDecider {
+
+        @Override
+        public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
+            Random rand = new Random();
+
+            int randomNumber = rand.nextInt(50) + 1;
+            log.info("랜덤숫자: {}", randomNumber);
+
+            if(randomNumber % 2 == 0) {
+                return new FlowExecutionStatus("EVEN");
+            } else {
+                return new FlowExecutionStatus("ODD");
+            }
+        }
+    }
+}
+```
