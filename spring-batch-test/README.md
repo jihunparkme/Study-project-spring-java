@@ -59,8 +59,9 @@ Job Parameter에 따라 생성되는 테이블
 
 - Job Parameter
   - Spring Batch가 실행될 때 외부에서 받을 수 있는 파라미터
-- Job Parameter를 사용할 경우 Program arguments에 requestDate=20220805 추가
-- Job Parameter가 같을 경우 테이블에 기록되지 않음 -> 동일한 Job Parameter는 여러개 존재할 수 없음
+  - Job Parameter를 사용할 경우 Program arguments에 requestDate=20220805 추가
+  - Job Parameter가 같을 경우 테이블에 기록되지 않음 -> 동일한 Job Parameter는 여러개 존재할 수 없음
+- Job Parameter를 사용하기 위해선 Spring Batch 전용 Scope인 `@StepScope`와 `@JobScope` 선언으로 Bean을 생성해야 함
 
 | JOB\_INSTANCE\_ID | VERSION | JOB\_NAME | JOB\_KEY |
 | :--- | :--- | :--- | :--- |
@@ -356,3 +357,18 @@ public class DeciderJobConfiguration {
     }
 }
 ```
+
+## Chunk
+
+데이터 덩어리로 작업 할 때 각 커밋 사이에 처리되는 row 수
+
+- Chunk 지향 처리: 한 번에 하나씩 데이터를 읽어 Chunk라는 덩어리를 만든 뒤, Chunk 단위로 트랜잭션을 다루는 것
+- 실패할 경우엔 해당 Chunk 만큼만 롤백
+- Chunk Size는 한번에 처리될 트랜잭션 단위를 얘기하며, Page Size는 한번에 조회(Page 단위로 끊어서 조회)할 Item의 양
+- 성능 이슈와 영속성 컨텍스트의 깨지는 문제를 막기 위해 두 개 값을 일치시키는 것이 좋음
+
+동작 `ChunkOrientedTasklet`
+
+- Reader에서 chunk size만큼 데이터를 누적
+- 읽어온 데이터를 1개씩 chunk, Processor에서 가공 
+- 가공된 데이터들을 별도의 공간에 모은 뒤, Chunk 단위만큼 쌓이게 되면 Writer에 전달하고 Writer는 일괄 저장
