@@ -1,5 +1,7 @@
 package com.example.springbatchtest.job;
 
+import com.example.springbatchtest.domain.Pay;
+import com.example.springbatchtest.domain.Pay2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
