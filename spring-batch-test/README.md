@@ -10,6 +10,7 @@
 > [6. Spring Batch 가이드 - Chunk 지향 처리](https://jojoldu.tistory.com/331?category=902551)
 > [7. Spring Batch 가이드 - ItemReader](https://jojoldu.tistory.com/336?category=902551)
 > [8. Spring Batch 가이드 - ItemWriter](https://jojoldu.tistory.com/339?category=902551)
+> [9. Spring Batch 가이드 - ItemProcessor](https://jojoldu.tistory.com/347?category=902551)
 
 > [Spring Batch](https://spring.io/projects/spring-batch#learn)
 
@@ -281,7 +282,7 @@ public class StepNextConditionalJobConfiguration {
 }
 ```
 
-## Decide
+### Decide
 
 분기 처리
 
@@ -365,7 +366,7 @@ public class DeciderJobConfiguration {
 }
 ```
 
-## Chunk
+### Chunk
 
 데이터 덩어리로 작업 할 때 각 커밋 사이에 처리되는 row 수
 
@@ -379,12 +380,14 @@ public class DeciderJobConfiguration {
 
 **동작 `ChunkOrientedTasklet`**
 
-- `ItemReader`: Reader에서 데이터를 읽고, chunk size만큼 데이터를 누적
+ItemReader, ItemWriter는 ChunkOrientedTasklet에서 필수 요소
+
+- `ItemReader`: Reader에서 데이터를 읽고, chunk size만큼 데이터를 누적, 처리가 필요할 경우 ItemProcessor에 전달
   - 가장 큰 장점은 데이터를 Streaming이 가능하다는 것
   - read() 메소드는 데이터를 하나씩 가져와 ItemWriter로 데이터를 전달하고, 다음 데이터를 다시 가져 온다. 
   - 이를 통해 reader & processor & writer가 Chunk 단위로 수행되고 주기적으로 Commit
-- `ItemWriter`: 읽어온 데이터를 1개씩 chunk, Processor에서 가공 
-- `ItemProcessor`: 가공된 데이터들을 별도의 공간에 모은 뒤, Chunk 단위만큼 쌓이게 되면 Writer에 전달하고 Writer는 일괄 저장
+- `ItemProcessor`:  청크의 Item 개수 만큼 처리 될 때까지 가공
+- `ItemWriter`: 가공된 데이터들을 별도의 공간에 모은 뒤, Chunk 단위만큼 쌓이게 되면 Writer에 전달하고 Writer는 일괄 처리 
 
 ## ItemReader
 
@@ -392,7 +395,7 @@ public class DeciderJobConfiguration {
 - 영속성 컨텍스트가 필요한 Reader 사용시 fetchSize와 ChunkSize는 같은 값을 유지
 - PagingItemReader 사용 시 정렬 포함 필수
 
-**CursorItemReader**
+### **CursorItemReader**
 - Database와 SocketTimeout을 충분히 큰 값으로 설정 필요
 - Cursor는 하나의 Connection으로 Batch가 끝날때까지 사용되므로 중간에 끊어질 수 있음
 
@@ -445,7 +448,7 @@ public class JdbcCursorItemReaderJobConfiguration {
 }
 ```
 
-**PagingItemReader**
+### **PagingItemReader**
 - Batch 수행 시간이 오래 걸리는 경우 CursorItemReader 대신 사용
 - 한 페이지를 읽을때마다 Connection을 맺고 끊기 때문에 많은 데이터라도 타임아웃과 부하 없이 수행 가능
 
@@ -519,7 +522,7 @@ public class JdbcPagingItemReaderJobConfiguration {
 }
 ```
 
-**JpaPagingItemReader**
+### **JpaPagingItemReader**
 
 - Querydsl, Jooq 등을 통한 ItemReader 구현체는 공식 지원되지 않으므로 CustomItemReader 구현 필요
 - HibernatePagingItemReader 에서는 Cursor 지원이 되지만 JpaPagingItemReader에서는 Cursor 기반 Database 접근을 지원하지 않음
@@ -566,6 +569,191 @@ public class JpaPagingItemReaderJobConfiguration {
         return list -> {
             for (Pay pay: list) {
                 log.info("Current Pay={}", pay);
+            }
+        };
+    }
+}
+```
+
+## ItemWriter
+
+Reader, Prcessor와 함께 ChunkOrientedTasklet을 구성하는 3 요소
+
+### **JdbcBatchItemWriter**
+
+- ORM을 사용하지 않는 경우 대부분 사용
+- 성능 향상을 위해 ChunkSize만큼 쿼리를 모으고, 모아놓은 쿼리를 DB에 전송하여 한 번에 실행 
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Configuration
+public class JdbcBatchItemWriterJobConfiguration {
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final DataSource dataSource; // DataSource DI
+
+    private static final int chunkSize = 10;
+
+    @Bean
+    public Job jdbcBatchItemWriterJob() {
+        return jobBuilderFactory.get("jdbcBatchItemWriterJob")
+                .start(jdbcBatchItemWriterStep())
+                .build();
+    }
+
+    @Bean
+    public Step jdbcBatchItemWriterStep() {
+        return stepBuilderFactory.get("jdbcBatchItemWriterStep")
+                .<Pay, Pay>chunk(chunkSize)
+                .reader(jdbcBatchItemWriterReader())
+                .writer(jdbcBatchItemWriter())
+                .build();
+    }
+
+    @Bean
+    public JdbcCursorItemReader<Pay> jdbcBatchItemWriterReader() {
+        return new JdbcCursorItemReaderBuilder<Pay>()
+                .fetchSize(chunkSize)
+                .dataSource(dataSource)
+                .rowMapper(new BeanPropertyRowMapper<>(Pay.class))
+                .sql("SELECT id, amount, tx_name, tx_date_time FROM pay")
+                .name("jdbcBatchItemWriter")
+                .build();
+    }
+
+    /**
+     * reader에서 넘어온 데이터를 하나씩 출력하는 writer
+     */
+    @Bean // beanMapped()을 사용할때는 필수
+    public JdbcBatchItemWriter<Pay> jdbcBatchItemWriter() {
+        return new JdbcBatchItemWriterBuilder<Pay>()
+                .dataSource(dataSource)
+                .sql("insert into pay2(amount, tx_name, tx_date_time) values (:amount, :txName, :txDateTime)")
+                .beanMapped() // Pojo 기반으로 Insert SQL의 Values를 매핑
+                .build();
+    }
+}
+
+```
+
+### **JpaItemWriter**
+
+- Writer에 전달하는 데이터가 Entity 클래스일 경우 사용
+- JPA를 사용하기 때문에 영속성 관리를 위해 EntityManager를 할당
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Configuration
+public class JpaItemWriterJobConfiguration {
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final EntityManagerFactory entityManagerFactory;
+
+    private static final int chunkSize = 10;
+
+    @Bean
+    public Job jpaItemWriterJob() {
+        return jobBuilderFactory.get("jpaItemWriterJob")
+                .start(jpaItemWriterStep())
+                .build();
+    }
+
+    @Bean
+    public Step jpaItemWriterStep() {
+        return stepBuilderFactory.get("jpaItemWriterStep")
+                .<Pay, Pay2>chunk(chunkSize)
+                .reader(jpaItemWriterReader())
+                .processor(jpaItemProcessor())
+                .writer(jpaItemWriter())
+                .build();
+    }
+
+    @Bean
+    public JpaPagingItemReader<Pay> jpaItemWriterReader() {
+        return new JpaPagingItemReaderBuilder<Pay>()
+                .name("jpaItemWriterReader")
+                .entityManagerFactory(entityManagerFactory) // 영속성 관리를 위한 할당
+                .pageSize(chunkSize)
+                .queryString("SELECT p FROM Pay p")
+                .build();
+    }
+
+    @Bean
+    public ItemProcessor<Pay, Pay2> jpaItemProcessor() {
+        return pay -> new Pay2(pay.getAmount(), pay.getTxName(), pay.getTxDateTime());
+    }
+
+    @Bean
+    public JpaItemWriter<Pay2> jpaItemWriter() {
+        JpaItemWriter<Pay2> jpaItemWriter = new JpaItemWriter<>();
+        jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+        return jpaItemWriter;
+    }
+}
+```
+
+### **Custom ItemWriter**
+
+ItemWriter Interface 구현
+
+- Querydsl/Jooq 기반의 ItemReader, Custom 하게 구현이 필요한 경우 사용
+  - Reader에서 읽어온 데이터를 RestTemplate으로 외부 API로 전달해야할 경우
+  - 임시저장을 하고 비교하기 위해 싱글톤 객체에 값을 넣어야할 경우 
+  - 여러 Entity를 동시에 save 해야할 경우
+  - ...
+
+[Spring Batch ItemWriter에 List 전달하기](https://jojoldu.tistory.com/140)
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Configuration
+public class CustomItemWriterJobConfiguration {
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final EntityManagerFactory entityManagerFactory;
+
+    private static final int chunkSize = 10;
+
+    @Bean
+    public Job customItemWriterJob() {
+        return jobBuilderFactory.get("customItemWriterJob")
+                .start(customItemWriterStep())
+                .build();
+    }
+
+    @Bean
+    public Step customItemWriterStep() {
+        return stepBuilderFactory.get("customItemWriterStep")
+                .<Pay, Pay2>chunk(chunkSize)
+                .reader(customItemWriterReader())
+                .processor(customItemWriterProcessor())
+                .writer(customItemWriter())
+                .build();
+    }
+
+    @Bean
+    public JpaPagingItemReader<Pay> customItemWriterReader() {
+        return new JpaPagingItemReaderBuilder<Pay>()
+                .name("customItemWriterReader")
+                .entityManagerFactory(entityManagerFactory)
+                .pageSize(chunkSize)
+                .queryString("SELECT p FROM Pay p")
+                .build();
+    }
+
+    @Bean
+    public ItemProcessor<Pay, Pay2> customItemWriterProcessor() {
+        return pay -> new Pay2(pay.getAmount(), pay.getTxName(), pay.getTxDateTime());
+    }
+
+    @Bean
+    public ItemWriter<Pay2> customItemWriter() {
+        return items -> { // write() @Override 하면 구현체 생성
+            for (Pay2 item : items) {
+                System.out.println(item);
             }
         };
     }
