@@ -2,17 +2,7 @@
 
 향로님 Spring Batch 가이드 보고 따라하기
 
-> [1. Spring Batch 가이드 - 배치 어플리케이션이란?](https://jojoldu.tistory.com/324)
-> [2. Spring Batch 가이드 - Batch Job 실행해보기](https://jojoldu.tistory.com/325?category=902551)
-> [3. Spring Batch 가이드 - 메타테이블엿보기](https://jojoldu.tistory.com/326)
-> [4. Spring Batch 가이드 - Spring Batch Job Flow](https://jojoldu.tistory.com/328)
-> [5. Spring Batch 가이드 - Spring Batch Scope & Job Parameter](https://jojoldu.tistory.com/330)
-> [6. Spring Batch 가이드 - Chunk 지향 처리](https://jojoldu.tistory.com/331?category=902551)
-> [7. Spring Batch 가이드 - ItemReader](https://jojoldu.tistory.com/336?category=902551)
-> [8. Spring Batch 가이드 - ItemWriter](https://jojoldu.tistory.com/339?category=902551)
-> [9. Spring Batch 가이드 - ItemProcessor](https://jojoldu.tistory.com/347?category=902551)
-
-> [Spring Batch](https://spring.io/projects/spring-batch#learn)
+> [jojoldu/spring-batch-in-action](https://github.com/jojoldu/spring-batch-in-action)
 
 ## 배치 기능 활성화
 
@@ -938,3 +928,23 @@ ItemProcessor간의 체이닝을 지원하는 Processor
 ### Writer
 
 - Writer도 마찬가지로 트랜잭션 범위 안이며, Entity의 Lazy Loading 가능 
+
+## Reference
+
+**blog**
+
+> [1. Spring Batch 가이드 - 배치 어플리케이션이란?](https://jojoldu.tistory.com/324)
+> [2. Spring Batch 가이드 - Batch Job 실행해보기](https://jojoldu.tistory.com/325?category=902551)
+> [3. Spring Batch 가이드 - 메타테이블엿보기](https://jojoldu.tistory.com/326)
+> [4. Spring Batch 가이드 - Spring Batch Job Flow](https://jojoldu.tistory.com/328)
+> [5. Spring Batch 가이드 - Spring Batch Scope & Job Parameter](https://jojoldu.tistory.com/330)
+> [6. Spring Batch 가이드 - Chunk 지향 처리](https://jojoldu.tistory.com/331?category=902551)
+> [7. Spring Batch 가이드 - ItemReader](https://jojoldu.tistory.com/336?category=902551)
+> [8. Spring Batch 가이드 - ItemWriter](https://jojoldu.tistory.com/339?category=902551)
+> [9. Spring Batch 가이드 - ItemProcessor](https://jojoldu.tistory.com/347?category=902551)
+> [10. Spring Batch 가이드 - Spring Batch 테스트 코드](https://jojoldu.tistory.com/455?category=902551)
+> [10.1. Spring Batch 단위 테스트 코드 - Reader 편](https://jojoldu.tistory.com/456)
+
+**documentation**
+
+> [Spring Batch](https://spring.io/projects/spring-batch#learn)
