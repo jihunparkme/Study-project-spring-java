@@ -759,3 +759,182 @@ public class CustomItemWriterJobConfiguration {
     }
 }
 ```
+
+## ItemProcessor
+
+**Reader에서 넘겨준 데이터 개별건을 가공/처리하는 역할**
+
+`public interface ItemProcessor<I, O>`
+
+- ItemProcessor는 선택사항 (Writer 부분에서도 충분히 구현 가능)
+- 각 계층(읽기/처리/쓰기)을 분리할 수 있는 좋은 대안
+- 보통 비즈니스 로직을 담당
+  - 변환 
+    - Reader에서 읽은 데이터를 원하는 타입으로 변환해서 Writer에 넘기기 
+  - 필터 
+    - Reader에서 넘겨준 데이터를 Writer로 넘겨줄 것인지를 결정 
+    - null 반환 시 Writer에 전달하지 않음
+
+### 변환
+
+Reader에서 읽은 타입을 변환하여 Writer에 전달
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Configuration
+public class ProcessorConvertJobConfiguration {
+
+    public static final String JOB_NAME = "ProcessorConvertBatch";
+    public static final String BEAN_PREFIX = JOB_NAME + "_";
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final EntityManagerFactory emf;
+
+    @Value("${chunkSize:1000}")
+    private int chunkSize;
+
+    @Bean(JOB_NAME)
+    public Job job() {
+        return jobBuilderFactory.get(JOB_NAME)
+                .preventRestart()
+                .start(step())
+                .build();
+    }
+
+    @Bean(BEAN_PREFIX + "step")
+    @JobScope
+    public Step step() {
+        return stepBuilderFactory.get(BEAN_PREFIX + "step")
+                .<Teacher, String>chunk(chunkSize) // ChunkSize 앞에 선언될 타입 역시 Reader와 Writer 타입과 동일하게
+                .reader(reader())
+                .processor(processor())
+                .writer(writer())
+                .build();
+    }
+
+    @Bean
+    public JpaPagingItemReader<Teacher> reader() {
+        return new JpaPagingItemReaderBuilder<Teacher>()
+                .name(BEAN_PREFIX+"reader")
+                .entityManagerFactory(emf)
+                .pageSize(chunkSize)
+                .queryString("SELECT t FROM Teacher t")
+                .build();
+    }
+
+    /**
+     * public interface ItemProcessor<I, O>
+     * I : Reader에서 읽어올 타입이
+     * O : Writer에서 넘겨줄 타입
+     */
+    @Bean
+    public ItemProcessor<Teacher, String> processor() {
+        return teacher -> {
+            return teacher.getName();
+        };
+    }
+
+    private ItemWriter<String> writer() {
+        return items -> {
+            for (String item : items) {
+                log.info("Teacher Name= {}", item);
+            }
+        };
+    }
+}
+```
+
+### 필터
+
+Writer에 값을 넘길지 말지를 Processor에서 판단
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+@Configuration
+public class ProcessorNullJobConfiguration {
+
+    public static final String JOB_NAME = "processorNullBatch";
+    public static final String BEAN_PREFIX = JOB_NAME + "_";
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final EntityManagerFactory emf;
+
+    @Value("${chunkSize:1000}")
+    private int chunkSize;
+
+    @Bean(JOB_NAME)
+    public Job job() {
+        return jobBuilderFactory.get(JOB_NAME)
+                .preventRestart()
+                .start(step())
+                .build();
+    }
+
+    @Bean(BEAN_PREFIX + "step")
+    @JobScope
+    public Step step() {
+        return stepBuilderFactory.get(BEAN_PREFIX + "step")
+                .<Teacher, Teacher>chunk(chunkSize)
+                .reader(reader())
+                .processor(processor())
+                .writer(writer())
+                .build();
+    }
+
+    @Bean
+    public JpaPagingItemReader<Teacher> reader() {
+        return new JpaPagingItemReaderBuilder<Teacher>()
+                .name(BEAN_PREFIX+"reader")
+                .entityManagerFactory(emf)
+                .pageSize(chunkSize)
+                .queryString("SELECT t FROM Teacher t")
+                .build();
+    }
+
+    @Bean
+    public ItemProcessor<Teacher, Teacher> processor() {
+        return teacher -> {
+
+            boolean isIgnoreTarget = teacher.getId() % 2 == 0L;
+            if(isIgnoreTarget){
+                log.info(">>>>>>>>> ID={}, Teacher name={}, isIgnoreTarget={}", teacher.getId(), teacher.getName(), isIgnoreTarget);
+                return null; // null 반환 시 Writer에 전달하지 않음
+            }
+
+            return teacher;
+        };
+    }
+
+    private ItemWriter<Teacher> writer() {
+        return items -> {
+            for (Teacher item : items) {
+                log.info("DI= {}, Teacher Name={}", item.getId(), item.getName());
+            }
+        };
+    }
+}
+```
+
+### CompositeItemProcessor
+
+ItemProcessor간의 체이닝을 지원하는 Processor
+
+- 변환이 2번 이상으로 필요할 경우
+
+## 트랜잭션 범위
+
+트랜잭션 범위는 Chunk단위
+
+- Reader에서 Entity를 반환해 주었다면 Entity간의 Lazy Loading 가능
+
+### Processor
+
+- Processor는 트랜잭션 범위 안이며, Entity의 Lazy Loading 가능
+
+### Writer
+
+- Writer도 마찬가지로 트랜잭션 범위 안이며, Entity의 Lazy Loading 가능 
