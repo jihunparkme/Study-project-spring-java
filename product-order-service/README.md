@@ -35,9 +35,22 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 - service, adapter, repository 클래스에 @Component 선언
 - 기존 테스트에 @SpringBootTest 선언 및 서비스는 @Autowired 로 주입 
 
+## API 테스트로 전환하기
+
+API 테스트를 위해 io.rest-assured:rest-assured 사용하기
+
+
 ---
 
 Point.
 - final keyword
 - record class
 - Assert in constructor
+- rest-assured api test
+- var type
+
+---
+
+TODO.
+
+> commit 이력 링크로 남기기
