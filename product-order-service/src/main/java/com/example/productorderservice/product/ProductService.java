@@ -1,8 +1,8 @@
 package com.example.productorderservice.product;
 
-/**
- * 04. ProductService 메서드 구현
- */
+import org.springframework.stereotype.Component;
+
+@Component
 class ProductService {
     private final ProductPort productPort;
 
