@@ -23,6 +23,8 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 (5) 레파지포리 생성
 - 테스트에서는 데이터를 인메모리(Map)로 관리
 
+> Then -> Given -> When 순서로 적성해 보기
+
 .
 
 **Move Inner class for test to Upper level**
@@ -42,6 +44,13 @@ API 테스트를 위해 io.rest-assured:rest-assured 사용하기
   - 데이터가 캐싱이 되어 table sequence 가 꼬여 다른 테스트가 깨질 수 있음(ex. table sequence)
   - 격리 방법은 [3월 우아한테크세미나 / 우아한ATDD](https://www.youtube.com/watch?v=ITVpmjM4mUE) 참고
 
+## JPA 적용하기
+
+기존 in-memory 형태의 데이터 저장소를 jpa 로 적용
+
+## 상품 조회 기능 구현하기
+
+상품 등록 구현으로 이미 기반이 잡혀 있으므로 POJO 부터 테스트를 시작하지 않고 @SpringBootTest 로 시작
 
 ---
 
@@ -51,6 +60,9 @@ Point.
 - Assert in constructor
 - rest-assured api test
 - var type
+- HttpStatus
+  - 200 OK
+  - 201 CREATE
 
 ---
 
