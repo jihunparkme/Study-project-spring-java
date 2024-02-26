@@ -38,6 +38,9 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 ## API 테스트로 전환하기
 
 API 테스트를 위해 io.rest-assured:rest-assured 사용하기
+- rest-assured 는 격리가 잘 안 되는 문제가 존재
+  - 데이터가 캐싱이 되어 table sequence 가 꼬여 다른 테스트가 깨질 수 있음(ex. table sequence)
+  - 격리 방법은 [3월 우아한테크세미나 / 우아한ATDD](https://www.youtube.com/watch?v=ITVpmjM4mUE) 참고
 
 
 ---
