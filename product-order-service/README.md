@@ -38,6 +38,7 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 **Move Inner class for test to Upper level**
 
 테스트 코드에 작성된 inner class 들을 main class 로 이동
+- `F6` 단축키 활용
 
 > [Move Inner class for test to Upper leve]()
 
@@ -156,7 +157,8 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 ---
 
-Point.
+## Point.
+
 - final keyword
 - record class
 - Assert in constructor
@@ -168,15 +170,46 @@ Point.
   
 ---
 
-Reference.
+## Plugin.
 
+- CodeMetrics
+- GitHub Copilot
+- Translation
+  - Translate : Ctrl + Command + U
+  - Show Translation Dialog : Ctrl + Command + I
+  - Translate and Replace : Ctrl + Command + O
+
+.
+
+
+## Setting.
+
+**File and Code Templates**
+- Preferences -> Editor -> File and Code Templates
+  - New Method Body: `throw new UnsupportedOperationException("${SIMPLE_CLASS_NAME}#${METHOD_NAME} unsupported yet !!");`
+  - Implemented Method Body: `throw new UnsupportedOperationException("${SIMPLE_CLASS_NAME}#${METHOD_NAME} not implemented yet !!");`
+
+**Postfix Completion**
+- Preferences -> Editor -> General -> Postfix Completion
+  - aste: `org.junit.jupiter.api.Assertions.assertEquals("$END$", $EXPR$);`
+  - astt: `org.junit.jupiter.api.Assertions.assertTrue($EXPR$);`
+  - use static import possible check
+  
 **intellij introduce variable final**
 - Preference -> Editor -> Code Style -> Java -> Code Generation -> Final Modifier
   - Make generated local variables final
   - Make generated parameters final
 
+**Keymap**
+- Preferences -> Keymap
+  - Select File in Project View -> Add Keyboard Shortcut
+
 **Live Templates**
-- Preferences -> Editor -> Live Templates
+- Preferences -> Editor -> Live Templates -> Applicable contexts
+  - asst: `org.junit.jupiter.api.Assertions.assertEquals($END$, $EXPR$);` 
+  - asth: `org.assertj.core.api.Assertions.assertThatThrownBy(() -> { $END$ }).isInstanceOf($EXPR$.class).hasMessageContaining("");` 
+  - d: `@org.junit.jupiter.api.DisplayName("$EXPR$")`
+  - td: `@org.junit.jupiter.api.Test void $EXPR$() { org.assertj.core.api.Assertions.assertThat($END$).isEqualTo(); }`
 
 **Inspections**
 - Preferences -> Editor -> Inspections
@@ -197,10 +230,3 @@ Reference.
 - Preferences -> Editor -> Inlay Hints -> Java -> Code vision -> Show hints for
   - Usages
   - inheritors
-
-
----
-
-TODO.
-
-> commit 이력 링크로 남기기
