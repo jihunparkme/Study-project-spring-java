@@ -1,8 +1,5 @@
 package com.example.productorderservice.product;
 
-import io.restassured.RestAssured;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
@@ -24,11 +21,7 @@ class ProductApiTest extends ApiTest {
         ProductSteps.requestAddProduct(ProductSteps.getAddProductRequest());
         Long productId = 1L;
 
-        final ExtractableResponse<Response> response = RestAssured.given().log().all() // 요청 로그 남기기
-                .when()
-                .get("/products/{productId}", productId)
-                .then().log().all()
-                .extract();
+        final var response = ProductSteps.requestInquiryProduct(productId);
 
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.jsonPath().getString("id")).isEqualTo("1");

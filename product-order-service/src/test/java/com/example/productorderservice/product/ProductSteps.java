@@ -22,4 +22,12 @@ public class ProductSteps {
         final DiscountPolicy discountPolicy = DiscountPolicy.NONE;
         return new AddProductRequest(name, price, discountPolicy); // 02. Request 클래스 생성
     }
+
+    public static ExtractableResponse<Response> requestInquiryProduct(final Long productId) {
+        return RestAssured.given().log().all() // 요청 로그 남기기
+                .when()
+                .get("/products/{productId}", productId)
+                .then().log().all()
+                .extract();
+    }
 }
