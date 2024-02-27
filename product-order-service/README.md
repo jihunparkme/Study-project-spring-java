@@ -150,6 +150,10 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 > [JPA 적용하기]()
 
+## 상세 패키지 구조 만들기
+
+> [상세 패키지 구조 만들기]()
+
 ---
 
 Point.

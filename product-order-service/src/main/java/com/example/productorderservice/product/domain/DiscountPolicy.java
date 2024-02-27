@@ -1,24 +1,24 @@
-package com.example.productorderservice.product;
+package com.example.productorderservice.product.domain;
 
 public enum DiscountPolicy {
     NONE {
         @Override
-        int applyDiscount(final int price) {
+        public int applyDiscount(final int price) {
             return price;
         }
     },
     RATE {
         @Override
-        int applyDiscount(final int price) {
+        public int applyDiscount(final int price) {
             return (int) (price * 0.9);
         }
     },
     FIX_1000_AMOUNT {
         @Override
-        int applyDiscount(final int price) {
+        public int applyDiscount(final int price) {
             return Math.max(price - 1000, 0);
         }
     };
 
-    abstract int applyDiscount(final int price);
+    public abstract int applyDiscount(final int price);
 }
