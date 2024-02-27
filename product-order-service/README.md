@@ -136,8 +136,9 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 **POJO**
 
-**스프링부트 테스트로 전환하기**
+> [POJO 주문 결제 기능 구현하기]()
 
+**스프링부트 테스트로 전환하기**
 
 **API 테스트로 전환하기**
 
