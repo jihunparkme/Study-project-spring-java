@@ -2,7 +2,9 @@
 
 [실전! 스프링부트 상품-주문 API 개발로 알아보는 TDD](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-%EC%8B%A4%EC%A0%84-%EC%83%81%ED%92%88%EC%A3%BC%EB%AC%B8-tdd/dashboard) 강의 정리 
 
-## POJO 상품 등록 기능 구현하기
+## 상품 등록 기능 구현하기
+
+### POJO
 
 **Java TDD**
 
@@ -39,7 +41,7 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 
 > [Move Inner class for test to Upper leve]()
 
-## 스프링부트 테스트로 전환하기
+### 스프링부트 테스트로 전환하기
 
 순수 자바로 구현된 서비스를 스프링 빈으로 등록하고 스프링 부트 테스트로 동작하도록 전환
 - service, adapter, repository 클래스에 @Component 선언
@@ -47,7 +49,7 @@ final AddProductRequest request = new AddProductRequest(name, price, discountPol
 
 > [스프링부트 테스트로 전환하기]()
 
-## API 테스트로 전환하기
+### API 테스트로 전환하기
 
 API 테스트를 위해 io.rest-assured:rest-assured 사용하기
 - rest-assured 는 격리가 잘 안 되는 문제가 존재
@@ -60,7 +62,7 @@ API 테스트를 위해 io.rest-assured:rest-assured 사용하기
 >
 > [rest-assured 테스트 격리 코드 추가]()
 
-## JPA 적용하기
+### JPA 적용하기
 
 기존 in-memory 형태의 데이터 저장소를 jpa 로 적용
 
@@ -70,7 +72,37 @@ API 테스트를 위해 io.rest-assured:rest-assured 사용하기
 
 상품 등록 구현으로 이미 기반이 잡혀 있으므로 POJO 부터 테스트를 시작하지 않고 @SpringBootTest 로 시작
 
-- [상품 조회 기능 구현하기]()
+> [상품 조회 기능 구현하기]()
+>
+> [상품 조회 기능 API 테스트로 전환]()
+
+## 상품 수정 기능 구현하기
+
+### POJO
+
+상품 등록과 동일한 방식으로 진행.
+
+(1) 필요한 서비스 호출
+```java
+productService.updateProduct(productId, request);
+```
+
+(2) 서비스 호출에 필요한 Request record 클래스 생성
+- Assert 를 활용해서 생성자 파라미터 검증
+```java
+final UpdateProductRequest request = new UpdateProductRequest(name, price, discountPolicy);
+```
+
+(3) 서비스에 상품 수정 메서드 구현
+
+(4) 상품 수정을 위한 도메인 메서드는 테스트 필수
+- Product.update
+
+(4) StubClass 또는 Mockito 를 활용하여 테스트
+
+> [상품 수정 기능 구현 및 Stub 클래스를 활용한 테스트]()
+> 
+> [Use Mockito instead of StubClass]()
 
 ---
 
