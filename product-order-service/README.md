@@ -108,6 +108,31 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 > [POJO Test to SpringBoot Test]()
 
+### API 테스트로 전환하기
+
+> [API 테스트로 전환하기]()
+
+## 상품 주문 기능 구현하기
+
+**POJO**
+
+**스프링부트 테스트로 전환하기**
+
+**API 테스트로 전환하기**
+
+**JPA 적용**
+
+## 주문 결제 기능 구현하기
+
+**POJO**
+
+**스프링부트 테스트로 전환하기**
+
+
+**API 테스트로 전환하기**
+
+**JPA 적용**
+
 ---
 
 Point.
@@ -119,6 +144,39 @@ Point.
 - HttpStatus
   - 200 OK
   - 201 CREATE
+  
+---
+
+Reference.
+
+**intellij introduce variable final**
+- Preference -> Editor -> Code Style -> Java -> Code Generation -> Final Modifier
+  - Make generated local variables final
+  - Make generated parameters final
+
+**Live Templates**
+- Preferences -> Editor -> Live Templates
+
+**Inspections**
+- Preferences -> Editor -> Inspections
+  - Local variable or parameter can be final
+
+**extract variable final**
+- option + command + v
+- option + shift + O
+  - Declare final
+  - Declare var
+
+**extract method final**
+- option + command + m
+- option + shift + O
+  - make static
+
+**code vision usages**
+- Preferences -> Editor -> Inlay Hints -> Java -> Code vision -> Show hints for
+  - Usages
+  - inheritors
+
 
 ---
 
