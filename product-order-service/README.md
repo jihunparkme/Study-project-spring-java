@@ -126,6 +126,8 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 **API 테스트로 전환하기**
 
+> [API 테스트로 전환하기]()
+
 **JPA 적용**
 
 ## 주문 결제 기능 구현하기
