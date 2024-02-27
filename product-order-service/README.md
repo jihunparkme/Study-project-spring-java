@@ -104,6 +104,10 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 > 
 > [Use Mockito instead of StubClass]()
 
+### 스프링부트 테스트로 전환하기
+
+> [POJO Test to SpringBoot Test]()
+
 ---
 
 Point.
