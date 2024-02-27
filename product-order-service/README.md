@@ -116,7 +116,13 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 **POJO**
 
+> [POJO 상품 주문 기능 구현하기]()
+> 
+> [Move Inner class for test to Upper leve]()
+
 **스프링부트 테스트로 전환하기**
+
+> [스프링부트 테스트로 전환하기]()
 
 **API 테스트로 전환하기**
 

@@ -1,35 +1,22 @@
 package com.example.productorderservice.order;
 
-import com.example.productorderservice.product.DiscountPolicy;
-import com.example.productorderservice.product.Product;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.productorderservice.product.ProductService;
+import com.example.productorderservice.product.ProductSteps;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 class OrderServiceTest {
 
+    @Autowired
     private OrderService orderService;
-    private OrderPort orderPort;
-    private OrderRepository orderRepository;
-
-    @BeforeEach
-    void setUp() {
-        orderRepository = new OrderRepository();
-        orderPort = new OrderPort() {
-            @Override
-            public Product getProductById(final long productId) {
-                return new Product("상품명", 1000, DiscountPolicy.NONE);
-            }
-
-            @Override
-            public void save(final Order order) {
-                orderRepository.save(order);
-            }
-        };
-        orderService = new OrderService(orderPort);
-    }
+    @Autowired
+    private ProductService productService;
 
     @Test
     void 상품주문() {
+        productService.addProduct(ProductSteps.getAddProductRequest());
         final CreateOrderRequest request = getCreateOrderRequest();
 
         orderService.createOrder(request);
