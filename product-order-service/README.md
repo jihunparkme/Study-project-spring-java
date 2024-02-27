@@ -130,6 +130,8 @@ final UpdateProductRequest request = new UpdateProductRequest(name, price, disco
 
 **JPA 적용**
 
+> [JPA 적용하기]()
+
 ## 주문 결제 기능 구현하기
 
 **POJO**
