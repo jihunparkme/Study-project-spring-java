@@ -16,7 +16,7 @@ public class ProductServiceTest {
     void updateProduct() {
         productService.addProduct(ProductSteps.getAddProductRequest());
         final Long productId = 1L;
-        final UpdateProductRequest request = new UpdateProductRequest("상품 수정", 2000, DiscountPolicy.NONE);
+        final UpdateProductRequest request = ProductSteps.getUpdateProductRequest();
 
         productService.updateProduct(productId, request);
 

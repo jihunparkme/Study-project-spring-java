@@ -30,4 +30,18 @@ public class ProductSteps {
                 .then().log().all()
                 .extract();
     }
+
+    public static UpdateProductRequest getUpdateProductRequest() {
+        return new UpdateProductRequest("상품 수정", 2000, DiscountPolicy.NONE);
+    }
+
+    public static ExtractableResponse<Response> requestUpdateProduct(final long productId) {
+        return RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(ProductSteps.getUpdateProductRequest())
+                .when()
+                .patch("/products/{productId}", productId)
+                .then().log().all()
+                .extract();
+    }
 }
