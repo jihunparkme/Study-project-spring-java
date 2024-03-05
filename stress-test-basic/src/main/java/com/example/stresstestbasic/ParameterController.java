@@ -2,10 +2,7 @@ package com.example.stresstestbasic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ParameterController {
@@ -17,6 +14,13 @@ public class ParameterController {
         logger.info("{} / {}", idAndPassword.getId(), idAndPassword.getPassword());
 
         return "Login Success";
+    }
+
+    @GetMapping("/search")
+    public String search(@RequestParam String query) {
+        logger.info("query: {}", query);
+
+        return "Query Success";
     }
 
     static class IdAndPassword {

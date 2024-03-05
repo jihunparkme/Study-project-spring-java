@@ -17,3 +17,7 @@ scenarios:
           json:
             id: "{{ id }}"
             password: "{{ password }}"
+  - name: "find user"
+    flow:
+      - get:
+          url: "/search?query={{ id }}"
