@@ -9,6 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -37,5 +41,28 @@ class StockServiceTest {
         final Stock stock = stockRepository.findById(1L).orElseThrow();
 
         assertEquals(99, stock.getQuantity());
+    }
+
+    @Test
+    void decrease_inventory_concurrent_requests() throws InterruptedException {
+        int threadCount = 100;
+        final ExecutorService executorService = Executors.newFixedThreadPool(32);
+        final CountDownLatch latch = new CountDownLatch(threadCount); // 다른 스레드에서 수행 중인 작업이 완료될 때까지 대기할 수 있도록 지원
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    stockService.decreases(1L, 1L);
+                } finally {
+                    latch.countDown();
+                }
+            });
+
+            latch.await();
+        }
+
+        final Stock stock = stockRepository.findById(1L).orElseThrow();
+
+        assertEquals(0, stock.getQuantity());
     }
 }
