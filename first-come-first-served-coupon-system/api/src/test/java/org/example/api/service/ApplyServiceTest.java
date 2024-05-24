@@ -1,6 +1,5 @@
 package org.example.api.service;
 
-import org.assertj.core.api.Assertions;
 import org.example.api.repository.CouponRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
