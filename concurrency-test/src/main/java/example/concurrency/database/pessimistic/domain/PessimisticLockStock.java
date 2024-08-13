@@ -1,4 +1,4 @@
-package example.concurrency.database.domain;
+package example.concurrency.database.pessimistic.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-public class DatabaseStock {
+public class PessimisticLockStock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class DatabaseStock {
 
     private Long quantity;
 
-    public DatabaseStock(final Long productId, final Long quantity) {
+    public PessimisticLockStock(final Long productId, final Long quantity) {
         this.productId = productId;
         this.quantity = quantity;
     }

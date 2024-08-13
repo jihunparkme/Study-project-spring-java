@@ -1,7 +1,7 @@
 package example.concurrency.database.pessimistic.service;
 
-import example.concurrency.database.domain.DatabaseStock;
-import example.concurrency.database.domain.DatabaseStockRepository;
+import example.concurrency.database.pessimistic.domain.PessimisticLockStock;
+import example.concurrency.database.pessimistic.domain.PessimisticLockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,15 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PessimisticLockStockService {
 
-    private final DatabaseStockRepository stockRepository;
+    private final PessimisticLockRepository stockRepository;
 
     @Transactional
     public void decrease(Long id, Long quantity) {
-        final DatabaseStock stock = stockRepository.findByIdWithPessimisticLock(id);
+        final PessimisticLockStock stock = stockRepository.findByIdWithPessimisticLock(id);
         final Long beforeQuantity = stock.getQuantity();
         stock.decrease(quantity);
 
-        final DatabaseStock savedStock = stockRepository.save(stock);
+        final PessimisticLockStock savedStock = stockRepository.save(stock);
         log.info("[quantity] before: {}, after: {}", beforeQuantity, savedStock.getQuantity());
     }
 }

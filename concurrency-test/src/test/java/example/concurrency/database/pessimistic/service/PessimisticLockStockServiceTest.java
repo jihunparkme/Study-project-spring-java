@@ -1,10 +1,8 @@
 package example.concurrency.database.pessimistic.service;
 
-import example.concurrency.database.domain.DatabaseStock;
-import example.concurrency.database.domain.DatabaseStockRepository;
-import example.concurrency.java.async.service.JavaAsyncStockService;
-import example.concurrency.java.domain.JavaStock;
-import example.concurrency.java.domain.JavaStockRepository;
+import example.concurrency.database.pessimistic.domain.PessimisticLockStock;
+import example.concurrency.database.pessimistic.domain.PessimisticLockRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +16,7 @@ import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @SpringBootTest
 class PessimisticLockStockServiceTest {
 
@@ -25,11 +24,11 @@ class PessimisticLockStockServiceTest {
     private PessimisticLockStockService stockService;
 
     @Autowired
-    private DatabaseStockRepository stockRepository;
+    private PessimisticLockRepository stockRepository;
 
     @BeforeEach
     void beforeEach() {
-        stockRepository.saveAndFlush(new DatabaseStock(1L, 100L));
+        stockRepository.saveAndFlush(new PessimisticLockStock(1L, 100L));
     }
 
     @AfterEach
@@ -49,6 +48,8 @@ class PessimisticLockStockServiceTest {
                 executorService.submit(() -> {
                     try {
                         stockService.decrease(1L, 1L);
+                    } catch (RuntimeException e) {
+                        log.error("RuntimeException {}" ,e.getMessage());
                     } finally {
                         latch.countDown();
                     }
@@ -58,7 +59,7 @@ class PessimisticLockStockServiceTest {
 
         latch.await();
 
-        final DatabaseStock stock = stockRepository.findById(1L).orElseThrow();
+        final PessimisticLockStock stock = stockRepository.findById(1L).orElseThrow();
         assertEquals(0, stock.getQuantity());
     }
 }
