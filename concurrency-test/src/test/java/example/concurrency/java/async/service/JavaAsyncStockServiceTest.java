@@ -2,7 +2,6 @@ package example.concurrency.java.async.service;
 
 import example.concurrency.java.domain.JavaStock;
 import example.concurrency.java.domain.JavaStockRepository;
-import example.concurrency.java.sync.service.JavaSyncStockService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +13,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @SpringBootTest
-class JavaASyncJavaStockServiceTest {
+class JavaAsyncStockServiceTest {
 
     @Autowired
     private JavaAsyncStockService stockService;
