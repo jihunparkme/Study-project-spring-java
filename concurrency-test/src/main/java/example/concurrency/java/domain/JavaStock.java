@@ -27,7 +27,7 @@ public class JavaStock {
 
     public void decrease(Long quantity) {
         if (this.quantity - quantity < 0) {
-            throw new RuntimeException("재고는 0보다 작을 수 없습니다.");
+            throw new IllegalArgumentException("재고는 0보다 작을 수 없습니다.");
         }
 
         this.quantity -= quantity;
