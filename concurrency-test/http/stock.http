@@ -1,5 +1,8 @@
 ### java stock
-GET localhost:8080/api/v1/stock/save/java/1/10000
+GET localhost:8080/api/v1/stock/save/java/1/50000
 
 ### database pessimistic lock stock
 GET localhost:8080/api/v1/stock/save/database/pessimistic/1/50000
+
+### database optimistic lock stock
+GET localhost:8080/api/v1/stock/save/database/optimistic/1/50000

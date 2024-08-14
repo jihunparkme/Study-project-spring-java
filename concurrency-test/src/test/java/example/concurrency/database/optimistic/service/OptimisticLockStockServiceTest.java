@@ -2,9 +2,6 @@ package example.concurrency.database.optimistic.service;
 
 import example.concurrency.database.optimistic.domain.OptimisticLockRepository;
 import example.concurrency.database.optimistic.domain.OptimisticLockStock;
-import example.concurrency.database.pessimistic.domain.PessimisticLockRepository;
-import example.concurrency.database.pessimistic.domain.PessimisticLockStock;
-import example.concurrency.database.pessimistic.service.PessimisticLockStockService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest
@@ -52,10 +49,8 @@ class OptimisticLockStockServiceTest {
                     try {
                         stockService.decrease(1L, 1L);
                     } catch (IllegalArgumentException e) {
-                        log.error("RuntimeException {}", e.getMessage());
-                    } catch (InterruptedException e) {
-                        log.error("InterruptedException {}", e.getMessage());
-                    } finally {
+                        log.error("Stock Exception. {}", e.getMessage());
+                    }  finally {
                         latch.countDown();
                     }
                 });
