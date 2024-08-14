@@ -24,4 +24,9 @@ public class StockController {
     public JavaStock saveJavaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
         return stockRepository.saveAndFlush(new JavaStock(id, quantity));
     }
+
+    @GetMapping(value = "/save/database/pessimistic/{id}/{quantity}")
+    public PessimisticLockStock savePessimisticLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
+        return pessimisticLockRepository.saveAndFlush(new PessimisticLockStock(id, quantity));
+    }
 }
