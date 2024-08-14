@@ -58,7 +58,7 @@ class TestRunner {
 
     @Test
     public void test() {
-        HTTPResponse response = request.GET("http://192.111.222.777:8080/api/v1/stock/buy/1/java/async")
+        HTTPResponse response = request.GET("http://192.111.222.777:8080/api/v1/stock/buy/1/java/sync")
 
         if (response.statusCode == 301 || response.statusCode == 302) {
             grinder.logger.warn("Warning. The response may not be correct. The response code was {}.", response.statusCode)
