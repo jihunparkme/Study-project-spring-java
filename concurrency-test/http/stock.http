@@ -6,3 +6,6 @@ GET localhost:8080/api/v1/stock/save/database/pessimistic/1/50000
 
 ### database optimistic lock stock
 GET localhost:8080/api/v1/stock/save/database/optimistic/1/50000
+
+### database named lock stock
+GET localhost:8080/api/v1/stock/save/database/named/1/50000

@@ -1,5 +1,7 @@
 package example.concurrency.common.controller;
 
+import example.concurrency.database.named.domain.NamedLockRepository;
+import example.concurrency.database.named.domain.NamedLockStock;
 import example.concurrency.database.optimistic.domain.OptimisticLockRepository;
 import example.concurrency.database.optimistic.domain.OptimisticLockStock;
 import example.concurrency.database.pessimistic.domain.PessimisticLockRepository;
@@ -19,6 +21,7 @@ public class StockController {
     private final JavaStockRepository stockRepository;
     private final PessimisticLockRepository pessimisticLockRepository;
     private final OptimisticLockRepository optimisticLockRepository;
+    private final NamedLockRepository namedLockRepository;
 
     @GetMapping(value = "/save/java/{id}/{quantity}")
     public JavaStock saveJavaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
@@ -33,5 +36,10 @@ public class StockController {
     @GetMapping(value = "/save/database/optimistic/{id}/{quantity}")
     public OptimisticLockStock saveOptimisticLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
         return optimisticLockRepository.saveAndFlush(new OptimisticLockStock(id, quantity));
+    }
+
+    @GetMapping(value = "/save/database/named/{id}/{quantity}")
+    public NamedLockStock saveNamedLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
+        return namedLockRepository.saveAndFlush(new NamedLockStock(id, quantity));
     }
 }
