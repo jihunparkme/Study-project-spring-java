@@ -12,3 +12,6 @@ GET localhost:8080/api/v1/stock/save/database/named/1/50000
 
 ### redis incr lock stock
 GET localhost:8080/api/v1/stock/save/redis/incr/1/50000
+
+### redis lettuce lock stock
+GET localhost:8080/api/v1/stock/save/redis/lettuce/1/50000

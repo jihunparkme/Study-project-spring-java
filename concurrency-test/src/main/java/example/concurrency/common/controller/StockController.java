@@ -10,6 +10,8 @@ import example.concurrency.java.domain.JavaStock;
 import example.concurrency.java.domain.JavaStockRepository;
 import example.concurrency.redis.incr.domain.RedisIncrStock;
 import example.concurrency.redis.incr.domain.RedisIncrStockRepository;
+import example.concurrency.redis.lettuce.domain.RedisLettuceLockStock;
+import example.concurrency.redis.lettuce.domain.RedisLettuceLockStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,7 @@ public class StockController {
     private final OptimisticLockRepository optimisticLockRepository;
     private final NamedLockRepository namedLockRepository;
     private final RedisIncrStockRepository redisIncrStockRepository;
+    private final RedisLettuceLockStockRepository lettuceLockStockRepository;
 
     @GetMapping(value = "/save/java/{id}/{quantity}")
     public JavaStock saveJavaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
@@ -49,5 +52,10 @@ public class StockController {
     @GetMapping(value = "/save/redis/incr/{id}/{quantity}")
     public RedisIncrStock saveRedisIncrLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
         return redisIncrStockRepository.saveAndFlush(new RedisIncrStock(id, quantity));
+    }
+
+    @GetMapping(value = "/save/redis/lettuce/{id}/{quantity}")
+    public RedisLettuceLockStock saveRedisLettuceLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
+        return lettuceLockStockRepository.saveAndFlush(new RedisLettuceLockStock(id, quantity));
     }
 }
