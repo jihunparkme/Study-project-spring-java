@@ -8,6 +8,8 @@ import example.concurrency.database.pessimistic.domain.PessimisticLockRepository
 import example.concurrency.database.pessimistic.domain.PessimisticLockStock;
 import example.concurrency.java.domain.JavaStock;
 import example.concurrency.java.domain.JavaStockRepository;
+import example.concurrency.redis.incr.domain.RedisIncrStock;
+import example.concurrency.redis.incr.domain.RedisIncrStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,7 @@ public class StockController {
     private final PessimisticLockRepository pessimisticLockRepository;
     private final OptimisticLockRepository optimisticLockRepository;
     private final NamedLockRepository namedLockRepository;
+    private final RedisIncrStockRepository redisIncrStockRepository;
 
     @GetMapping(value = "/save/java/{id}/{quantity}")
     public JavaStock saveJavaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
@@ -41,5 +44,10 @@ public class StockController {
     @GetMapping(value = "/save/database/named/{id}/{quantity}")
     public NamedLockStock saveNamedLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
         return namedLockRepository.saveAndFlush(new NamedLockStock(id, quantity));
+    }
+
+    @GetMapping(value = "/save/redis/incr/{id}/{quantity}")
+    public RedisIncrStock saveRedisIncrLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
+        return redisIncrStockRepository.saveAndFlush(new RedisIncrStock(id, quantity));
     }
 }
