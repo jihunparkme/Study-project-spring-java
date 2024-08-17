@@ -6,7 +6,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @Entity
 @NoArgsConstructor
@@ -25,11 +27,7 @@ public class KafkaStock {
         this.quantity = quantity;
     }
 
-    public void decrease(Long quantity) {
-        if (this.quantity - quantity < 0) {
-            throw new IllegalArgumentException("stock cannot be less than 0.");
-        }
-
-        this.quantity -= quantity;
+    public void decrease() {
+        log.info("[Stock Decrease Process] ...");
     }
 }
