@@ -8,6 +8,8 @@ import example.concurrency.database.pessimistic.domain.PessimisticLockRepository
 import example.concurrency.database.pessimistic.domain.PessimisticLockStock;
 import example.concurrency.java.domain.JavaStock;
 import example.concurrency.java.domain.JavaStockRepository;
+import example.concurrency.kafka.domain.KafkaStock;
+import example.concurrency.kafka.domain.KafkaStockRepository;
 import example.concurrency.redis.incr.domain.RedisIncrStock;
 import example.concurrency.redis.incr.domain.RedisIncrStockRepository;
 import example.concurrency.redis.lettuce.domain.RedisLettuceLockStock;
@@ -31,6 +33,7 @@ public class StockController {
     private final RedisIncrStockRepository redisIncrStockRepository;
     private final RedisLettuceLockStockRepository lettuceLockStockRepository;
     private final RedissonLockStockRepository redissonLockStockRepository;
+    private final KafkaStockRepository kafkaStockRepository;
 
     @GetMapping(value = "/save/java/{id}/{quantity}")
     public JavaStock saveJavaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
@@ -65,5 +68,10 @@ public class StockController {
     @GetMapping(value = "/save/redis/redisson/{id}/{quantity}")
     public RedissonLockStock saveRedissonLockStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
         return redissonLockStockRepository.saveAndFlush(new RedissonLockStock(id, quantity));
+    }
+
+    @GetMapping(value = "/save/kafka/{id}/{quantity}")
+    public KafkaStock saveKafkaStock(@PathVariable("id") Long id, @PathVariable("quantity") Long quantity) {
+        return kafkaStockRepository.saveAndFlush(new KafkaStock(id, quantity));
     }
 }
