@@ -1,5 +1,6 @@
 package com.example.springbatchpartitioning
 
+import org.slf4j.LoggerFactory
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobScope
@@ -28,6 +29,7 @@ class DatePartitionJobConfig(
     private val jobRepository: JobRepository,
     private val transactionManager: PlatformTransactionManager
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     // 1. Job 설정
     @Bean
@@ -50,6 +52,16 @@ class DatePartitionJobConfig(
             .build()
     }
 
+    // 3. PartitionHandler 설정 (스레드 풀 및 실행 스텝 연결)
+    @Bean
+    fun partitionHandler(workerStep: Step): PartitionHandler {
+        val handler = TaskExecutorPartitionHandler()
+        handler.setTaskExecutor(batchTaskExecutor()) // 스레드 풀 주입
+        handler.step = workerStep
+        handler.gridSize = 6 // 동시에 실행할 최대 스레드 수
+        return handler
+    }
+
     @Bean
     @JobScope
     fun partitioner(
@@ -61,16 +73,6 @@ class DatePartitionJobConfig(
         val end = LocalDate.parse(endDate, formatter)
 
         return DateRangePartitioner(start, end)
-    }
-
-    // 3. PartitionHandler 설정 (스레드 풀 및 실행 스텝 연결)
-    @Bean
-    fun partitionHandler(workerStep: Step): PartitionHandler {
-        val handler = TaskExecutorPartitionHandler()
-        handler.setTaskExecutor(batchTaskExecutor()) // 스레드 풀 주입
-        handler.step = workerStep
-        handler.gridSize = 6 // 동시에 실행할 최대 스레드 수
-        return handler
     }
 
     // 4. Worker Step (Slave) 설정
@@ -92,7 +94,7 @@ class DatePartitionJobConfig(
     fun reader(
         @Value("#{stepExecutionContext['targetDate']}") targetDate: String
     ): ItemReader<String> {
-        println(">>> [Thread: ${Thread.currentThread().name}] Start reading date: $targetDate")
+        log.info(">>> [Thread: ${Thread.currentThread().name}] Start reading date: $targetDate")
         return ListItemReader(listOf("Data for $targetDate"))
     }
 
@@ -109,7 +111,7 @@ class DatePartitionJobConfig(
     @Bean
     fun writer(): ItemWriter<String> {
         return ItemWriter { items ->
-            items.forEach { println("<<< [Thread: ${Thread.currentThread().name}] save successfully: $it") }
+            items.forEach { log.info("<<< [Thread: ${Thread.currentThread().name}] save successfully: $it") }
         }
     }
 }
