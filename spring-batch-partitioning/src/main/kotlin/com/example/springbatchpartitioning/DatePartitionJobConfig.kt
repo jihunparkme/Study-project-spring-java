@@ -2,10 +2,12 @@ package com.example.springbatchpartitioning
 
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
+import org.springframework.batch.core.configuration.annotation.JobScope
 import org.springframework.batch.core.configuration.annotation.StepScope
 import org.springframework.batch.core.job.builder.JobBuilder
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.core.partition.PartitionHandler
+import org.springframework.batch.core.partition.support.Partitioner
 import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.step.builder.StepBuilder
@@ -19,6 +21,7 @@ import org.springframework.core.task.TaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Configuration
 class DatePartitionJobConfig(
@@ -37,14 +40,27 @@ class DatePartitionJobConfig(
 
     // 2. Manager Step (Master) 설정
     @Bean
-    fun masterStep(partitionHandler: PartitionHandler): Step {
+    fun masterStep(
+        partitionHandler: PartitionHandler,
+        partitioner: Partitioner,
+    ): Step {
         return StepBuilder("masterStep", jobRepository)
-            .partitioner("workerStep", DateRangePartitioner(
-                LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 2, 1)
-            ))
+            .partitioner("workerStep", partitioner)
             .partitionHandler(partitionHandler)
             .build()
+    }
+
+    @Bean
+    @JobScope
+    fun partitioner(
+        @Value("#{jobParameters['startDate']}") startDate: String,
+        @Value("#{jobParameters['endDate']}") endDate: String
+    ): Partitioner {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val start = LocalDate.parse(startDate, formatter)
+        val end = LocalDate.parse(endDate, formatter)
+
+        return DateRangePartitioner(start, end)
     }
 
     // 3. PartitionHandler 설정 (스레드 풀 및 실행 스텝 연결)
@@ -76,8 +92,7 @@ class DatePartitionJobConfig(
     fun reader(
         @Value("#{stepExecutionContext['targetDate']}") targetDate: String
     ): ItemReader<String> {
-        // 실제로는 이 targetDate를 쿼리 조건으로 사용하여 데이터를 읽어옴
-        println(">>> [Thread: ${Thread.currentThread().name}] $targetDate 데이터 읽기 시작")
+        println(">>> [Thread: ${Thread.currentThread().name}] Start reading date: $targetDate")
         return ListItemReader(listOf("Data for $targetDate"))
     }
 
@@ -94,7 +109,7 @@ class DatePartitionJobConfig(
     @Bean
     fun writer(): ItemWriter<String> {
         return ItemWriter { items ->
-            items.forEach { println("<<< [Thread: ${Thread.currentThread().name}] 저장 완료: $it") }
+            items.forEach { println("<<< [Thread: ${Thread.currentThread().name}] save successfully: $it") }
         }
     }
 }
