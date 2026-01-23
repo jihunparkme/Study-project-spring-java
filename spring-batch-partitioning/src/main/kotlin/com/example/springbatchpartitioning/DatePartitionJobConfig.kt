@@ -33,20 +33,20 @@ class DatePartitionJobConfig(
 
     // 1. Job 설정
     @Bean
-    fun datePartitionJob(masterStep: Step): Job {
+    fun datePartitionJob(managerStep: Step): Job {
         return JobBuilder("datePartitionJob", jobRepository)
             .incrementer(RunIdIncrementer())
-            .start(masterStep)
+            .start(managerStep)
             .build()
     }
 
     // 2. Manager Step (Master) 설정
     @Bean
-    fun masterStep(
+    fun managerStep(
         partitionHandler: PartitionHandler,
         partitioner: Partitioner,
     ): Step {
-        return StepBuilder("masterStep", jobRepository)
+        return StepBuilder("managerStep", jobRepository)
             .partitioner("workerStep", partitioner)
             .partitionHandler(partitionHandler)
             .build()
