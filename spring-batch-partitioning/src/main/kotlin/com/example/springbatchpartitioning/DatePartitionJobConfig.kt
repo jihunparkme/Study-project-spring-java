@@ -99,6 +99,7 @@ class DatePartitionJobConfig(
     }
 
     @Bean
+    @StepScope
     fun batchTaskExecutor(): TaskExecutor {
         val executor = ThreadPoolTaskExecutor()
         executor.corePoolSize = 6
