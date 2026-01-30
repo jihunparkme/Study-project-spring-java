@@ -2,7 +2,5 @@ spring:
     application:
         name: spring-batch-partitioning
 
-spring:
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/test
+
+
