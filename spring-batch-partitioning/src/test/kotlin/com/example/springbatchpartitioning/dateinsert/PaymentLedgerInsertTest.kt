@@ -1,13 +1,14 @@
 package com.example.springbatchpartitioning.dateinsert
 
+import com.example.springbatchpartitioning.compare.PaymentDetail
+import com.example.springbatchpartitioning.compare.PaymentLedger
+import com.example.springbatchpartitioning.compare.PaymentStatus
 import org.junit.jupiter.api.Disabled
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,8 +28,8 @@ class PaymentLedgerInsertTest {
 
     @Test
     fun insert_payment_ledger() {
-        val totalRecords = 1_000_000L
-        val batchSize = 10_000
+        val totalRecords = 100_000_000L
+        val batchSize = 100_000
         val startTime = System.currentTimeMillis()
 
         for (i in 0 until (totalRecords / batchSize)) {
@@ -62,7 +63,7 @@ class PaymentLedgerInsertTest {
             paymentMethod = listOf("CARD", "NAVER_PAY", "KAKAO_PAY", "TOSS")[random.nextInt(0, 4)],
             memo = dummyMemo,
             details = listOf(
-                PaymentDetail("상품A", 1, 5000),
+                PaymentDetail(itemName = "상품A", quantity = 1, unitPrice = 5000),
                 PaymentDetail("상품B", random.nextInt(1, 5), 12000)
             ),
             auditLog = listOf(
@@ -73,28 +74,3 @@ class PaymentLedgerInsertTest {
         )
     }
 }
-
-@Document(collection = "payment_ledger")
-data class PaymentLedger(
-    @Id val id: String? = null,
-    val transactionId: String,       // 거래 고유 ID
-    val orderId: String,             // 주문 ID
-    val userId: String,              // 사용자 ID
-    val amount: Long,                // 결제 금액
-    val currency: String = "KRW",    // 통화
-    val status: PaymentStatus,       // 결제 상태 (READY, PAID, CANCELLED, FAILED)
-    val paymentMethod: String,       // 결제 수단 (CARD, TRANSFER, PAY)
-    val memo: String,                // 넉넉한 용량을 위한 메모 (더미 텍스트)
-    val details: List<PaymentDetail>,// 결제 상세 내역
-    val auditLog: List<String>,      // 감사 로그
-    val createdAt: LocalDateTime = LocalDateTime.now(),
-    val updatedAt: LocalDateTime = LocalDateTime.now()
-)
-
-data class PaymentDetail(
-    val itemName: String,
-    val quantity: Int,
-    val unitPrice: Long
-)
-
-enum class PaymentStatus { READY, PAID, CANCELLED, FAILED }
