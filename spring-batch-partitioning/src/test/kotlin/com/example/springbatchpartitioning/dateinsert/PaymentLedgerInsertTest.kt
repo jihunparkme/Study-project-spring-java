@@ -27,7 +27,7 @@ class PaymentLedgerInsertTest {
 
     @Test
     fun insert_payment_ledger() {
-        val totalRecords = 100_000_000L
+        val totalRecords = 1_000_000L
         val batchSize = 10_000
         val startTime = System.currentTimeMillis()
 
