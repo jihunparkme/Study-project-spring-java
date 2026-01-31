@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.transaction.PlatformTransactionManager
@@ -103,18 +103,16 @@ class PaymentPartitionJobConfig(
         @Value("#{stepExecutionContext['fromIndex']}") fromIndex: Int,
         @Value("#{stepExecutionContext['toIndex']}") toIndex: Int
     ): MongoCursorItemReader<PaymentLedger> {
-        val query = Query().apply {
-            addCriteria(
-                where("orderNumber").gte(fromIndex).lte(toIndex)
-            )
-        }
-
         return MongoCursorItemReaderBuilder<PaymentLedger>()
             .name("paymentReader")
             .template(mongoTemplate)
             .collection("payment_ledger")
             .targetType(PaymentLedger::class.java)
-            .query(query)
+            .query(Query().apply {
+                addCriteria(
+                    Criteria.where("orderNumber").gte(fromIndex).lte(toIndex)
+                )
+            })
             .build()
     }
 
@@ -148,6 +146,6 @@ class PaymentPartitionJobConfig(
         bulkOps.insert(items.toList())
 
         val result = bulkOps.execute()
-        log.info(">>> [Bulk Write] Inserted: ${result.insertedCount}, Chunk Size: ${items.size}")
+        log.info(">>> [Bulk Write] Inserted: ${result.insertedCount}, Chunk Size: ${items.size()}")
     }
 }
