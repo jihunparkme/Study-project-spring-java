@@ -9,6 +9,7 @@ data class PaymentLedger(
     @Id val id: String? = null,
     val transactionId: String,       // 거래 고유 ID
     val orderId: String,             // 주문 ID
+    val orderNumber: Long,             // 주문 ID
     val userId: String,              // 사용자 ID
     val amount: Long,                // 결제 금액
     val currency: String = "KRW",    // 통화
