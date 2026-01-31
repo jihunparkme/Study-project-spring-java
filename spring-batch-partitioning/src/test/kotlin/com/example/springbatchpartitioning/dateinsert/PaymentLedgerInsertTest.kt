@@ -31,6 +31,7 @@ class PaymentLedgerInsertTest {
         val totalRecords = 100_000_000L
         val batchSize = 100_000
         val startTime = System.currentTimeMillis()
+        var cnt = 1L
 
         for (i in 0 until (totalRecords / batchSize)) {
             val bulkOps = mongoTemplate.bulkOps(
@@ -39,7 +40,7 @@ class PaymentLedgerInsertTest {
             )
 
             val ledgers = (1..batchSize).map {
-                createRandomLedger(i * batchSize + it)
+                createRandomLedger(cnt++)
             }
 
             bulkOps.insert(ledgers)
@@ -56,10 +57,11 @@ class PaymentLedgerInsertTest {
         val random = ThreadLocalRandom.current()
         return PaymentLedger(
             transactionId = UUID.randomUUID().toString(),
-            orderId = "ORD-${1000000 + index}",
+            orderId = "ORD-${100_000_000L + index}",
+            orderNumber = index,
             userId = "USER-${random.nextInt(1, 1000000)}",
             amount = random.nextLong(1000, 1000000),
-            status = PaymentStatus.values()[random.nextInt(0, 4)],
+            status = PaymentStatus.entries[random.nextInt(0, 4)],
             paymentMethod = listOf("CARD", "NAVER_PAY", "KAKAO_PAY", "TOSS")[random.nextInt(0, 4)],
             memo = dummyMemo,
             details = listOf(
