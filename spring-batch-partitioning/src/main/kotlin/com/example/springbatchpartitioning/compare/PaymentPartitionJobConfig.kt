@@ -43,8 +43,8 @@ class PaymentPartitionJobConfig(
 
     // 1. Job 설정
     @Bean
-    fun datePartitionJob(managerStep: Step): Job {
-        return JobBuilder("datePartitionJob", jobRepository)
+    fun paymentPartitionJob(managerStep: Step): Job {
+        return JobBuilder("paymentPartitionJob", jobRepository)
             .incrementer(RunIdIncrementer())
             .start(managerStep)
             .build()
@@ -52,21 +52,21 @@ class PaymentPartitionJobConfig(
 
     // 2. Manager Step (Master) 설정
     @Bean
-    fun managerStep(
+    fun paymentManagerStep(
         partitionHandler: PartitionHandler,
         partitioner: Partitioner,
     ): Step {
-        return StepBuilder("managerStep", jobRepository)
-            .partitioner("workerStep", partitioner)
+        return StepBuilder("paymentManagerStep", jobRepository)
+            .partitioner("paymentWorkerStep", partitioner)
             .partitionHandler(partitionHandler)
             .build()
     }
 
     // 3. PartitionHandler 설정 (스레드 풀 및 실행 스텝 연결)
     @Bean
-    fun partitionHandler(workerStep: Step): PartitionHandler {
+    fun paymentPartitionHandler(workerStep: Step): PartitionHandler {
         val handler = TaskExecutorPartitionHandler()
-        handler.setTaskExecutor(batchTaskExecutor()) // 스레드 풀 주입
+        handler.setTaskExecutor(paymentBatchTaskExecutor()) // 스레드 풀 주입
         handler.step = workerStep
         handler.gridSize = 6 // 동시에 실행할 최대 스레드 수
         return handler
@@ -74,7 +74,7 @@ class PaymentPartitionJobConfig(
 
     @Bean
     @JobScope
-    fun partitioner(
+    fun paymentPartitioner(
         @Value("#{jobParameters['totalCount']}") totalCount: Int,
         @Value("#{jobParameters['stepSize']}") stepSize: Int
     ): Partitioner {
@@ -83,23 +83,23 @@ class PaymentPartitionJobConfig(
 
     // 4. Worker Step (Slave) 설정
     @Bean
-    fun workerStep(
-        reader: ItemReader<PaymentLedger>,
-        processor: ItemProcessor<PaymentLedger, PaymentLedger>,
-        writer: ItemWriter<PaymentLedger>,
+    fun paymentWorkerStep(
+        paymentReader: ItemReader<PaymentLedger>,
+        paymentProcessor: ItemProcessor<PaymentLedger, PaymentLedger>,
+        paymentWriter: ItemWriter<PaymentLedger>,
     ): Step {
-        return StepBuilder("workerStep", jobRepository)
+        return StepBuilder("paymentWorkerStep", jobRepository)
             .chunk<PaymentLedger, PaymentLedger>(CHUNK_SIZE, transactionManager)
-            .reader(reader)
-            .processor(processor)
-            .writer(writer)
+            .reader(paymentReader)
+            .processor(paymentProcessor)
+            .writer(paymentWriter)
             .build()
     }
 
     // 5. Slave에서 사용할 Reader (파티셔너가 넘겨준 날짜 활용)
     @Bean
     @StepScope
-    fun reader(
+    fun paymentReader(
         @Value("#{stepExecutionContext['fromIndex']}") fromIndex: Int,
         @Value("#{stepExecutionContext['toIndex']}") toIndex: Int
     ): MongoCursorItemReader<PaymentLedger> {
@@ -109,7 +109,7 @@ class PaymentPartitionJobConfig(
         }
 
         return MongoCursorItemReaderBuilder<PaymentLedger>()
-            .name("partitionedReader")
+            .name("paymentReader")
             .template(mongoTemplate)
             .collection("payment_ledger")
             .targetType(PaymentLedger::class.java)
@@ -119,7 +119,7 @@ class PaymentPartitionJobConfig(
 
     @Bean
     @StepScope
-    fun batchTaskExecutor(): TaskExecutor {
+    fun paymentBatchTaskExecutor(): TaskExecutor {
         val executor = ThreadPoolTaskExecutor()
         executor.corePoolSize = 6
         executor.maxPoolSize = 10
@@ -129,14 +129,14 @@ class PaymentPartitionJobConfig(
     }
 
     @Bean
-    fun processor(): ItemProcessor<PaymentLedger, PaymentLedger> = ItemProcessor { item ->
+    fun paymentProcessor(): ItemProcessor<PaymentLedger, PaymentLedger> = ItemProcessor { item ->
         Thread.sleep(1000)
         log.info("Processing item: ${item.transactionId}")
         item.copy(updatedAt = LocalDateTime.now())
     }
 
     @Bean
-    fun writer(): MongoItemWriter<PaymentLedger> =
+    fun paymentWriter(): MongoItemWriter<PaymentLedger> =
         MongoItemWriter<PaymentLedger>().apply {
             setTemplate(mongoTemplate)
             setCollection("payment_ledger_backup")
