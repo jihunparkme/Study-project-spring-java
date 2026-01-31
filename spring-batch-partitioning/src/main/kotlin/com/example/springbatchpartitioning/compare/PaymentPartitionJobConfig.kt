@@ -16,14 +16,14 @@ import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
 import org.springframework.batch.item.data.MongoCursorItemReader
-import org.springframework.batch.item.data.MongoItemWriter
 import org.springframework.batch.item.data.builder.MongoCursorItemReaderBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
+import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.transaction.PlatformTransactionManager
@@ -103,9 +103,10 @@ class PaymentPartitionJobConfig(
         @Value("#{stepExecutionContext['fromIndex']}") fromIndex: Int,
         @Value("#{stepExecutionContext['toIndex']}") toIndex: Int
     ): MongoCursorItemReader<PaymentLedger> {
-
         val query = Query().apply {
-            addCriteria(Criteria.where("orderId").gte(fromIndex).lte(toIndex))
+            addCriteria(
+                where("orderNumber").gte(fromIndex).lte(toIndex)
+            )
         }
 
         return MongoCursorItemReaderBuilder<PaymentLedger>()
@@ -130,15 +131,23 @@ class PaymentPartitionJobConfig(
 
     @Bean
     fun paymentProcessor(): ItemProcessor<PaymentLedger, PaymentLedger> = ItemProcessor { item ->
-        Thread.sleep(1000)
-        log.info("Processing item: ${item.transactionId}")
+        log.info(">>> [Thread: ${Thread.currentThread().name}] Processing transaction: ${item.transactionId}")
         item.copy(updatedAt = LocalDateTime.now())
     }
 
     @Bean
-    fun paymentWriter(): MongoItemWriter<PaymentLedger> =
-        MongoItemWriter<PaymentLedger>().apply {
-            setTemplate(mongoTemplate)
-            setCollection("payment_ledger_backup")
-        }
+    fun paymentWriter(): ItemWriter<PaymentLedger> = ItemWriter { items ->
+        if (items.isEmpty) return@ItemWriter
+
+        val bulkOps = mongoTemplate.bulkOps(
+            BulkOperations.BulkMode.UNORDERED,
+            PaymentLedger::class.java,
+            "payment_ledger_backup"
+        )
+
+        bulkOps.insert(items.toList())
+
+        val result = bulkOps.execute()
+        log.info(">>> [Bulk Write] Inserted: ${result.insertedCount}, Chunk Size: ${items.size}")
+    }
 }
