@@ -1,6 +1,5 @@
 package com.example.springbatchpartitioning.compare
 
-import com.example.springbatchpartitioning.DateRangePartitioner
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
@@ -23,13 +22,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
-import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.transaction.PlatformTransactionManager
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Configuration
 class PaymentPartitionJobConfig(
@@ -77,14 +75,10 @@ class PaymentPartitionJobConfig(
     @Bean
     @JobScope
     fun partitioner(
-        @Value("#{jobParameters['startDate']}") startDate: String,
-        @Value("#{jobParameters['endDate']}") endDate: String
+        @Value("#{jobParameters['totalCount']}") totalCount: Int,
+        @Value("#{jobParameters['stepSize']}") stepSize: Int
     ): Partitioner {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val start = LocalDate.parse(startDate, formatter)
-        val end = LocalDate.parse(endDate, formatter)
-
-        return DateRangePartitioner(start, end)
+        return RangePartitioner(totalCount, stepSize)
     }
 
     // 4. Worker Step (Slave) 설정
@@ -95,7 +89,7 @@ class PaymentPartitionJobConfig(
         writer: ItemWriter<PaymentLedger>,
     ): Step {
         return StepBuilder("workerStep", jobRepository)
-            .chunk<PaymentLedger, PaymentLedger>(CHUNK_SIZE, transactionManager) // 1,000건 단위 청크 처리
+            .chunk<PaymentLedger, PaymentLedger>(CHUNK_SIZE, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)
@@ -105,15 +99,23 @@ class PaymentPartitionJobConfig(
     // 5. Slave에서 사용할 Reader (파티셔너가 넘겨준 날짜 활용)
     @Bean
     @StepScope
-    fun reader(): MongoCursorItemReader<PaymentLedger> =
-        MongoCursorItemReaderBuilder<PaymentLedger>()
-            .name("cursorReader")
+    fun reader(
+        @Value("#{stepExecutionContext['fromIndex']}") fromIndex: Int,
+        @Value("#{stepExecutionContext['toIndex']}") toIndex: Int
+    ): MongoCursorItemReader<PaymentLedger> {
+
+        val query = Query().apply {
+            addCriteria(Criteria.where("orderId").gte(fromIndex).lte(toIndex))
+        }
+
+        return MongoCursorItemReaderBuilder<PaymentLedger>()
+            .name("partitionedReader")
             .template(mongoTemplate)
             .collection("payment_ledger")
             .targetType(PaymentLedger::class.java)
-            .queryString("{}")
-            .sorts(mapOf("_id" to Sort.Direction.ASC))
+            .query(query)
             .build()
+    }
 
     @Bean
     @StepScope
