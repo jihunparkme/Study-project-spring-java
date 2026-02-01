@@ -25,7 +25,7 @@ class PaymentPartitionJobConfigTest {
 
     @Test
     fun `success date partitioning job`() {
-        val totalCount = 100_000L
+        val totalCount = 10_000_000L
         val jobParameters = JobParametersBuilder()
             .addLong("totalCount", totalCount)
             .addLong("stepSize", 1000)
@@ -55,7 +55,11 @@ class PaymentPartitionJobConfigTest {
 // TODO: 파티셔닝 적용한걸로 만들어 보기
 // 10_000_000L
 // 1_000_000L
+//     소요 시간: 1분 53초 (113469 ms)
+//     아이템당 평균 처리 속도: 0.113469 ms/item
 // 100_000L
 //     소요 시간: 0분 15초 (15883 ms)
 //     아이템당 평균 처리 속도: 0.15883 ms/item
 // 10_000L
+//     소요 시간: 0분 2초 (2495 ms)
+//     아이템당 평균 처리 속도: 0.2495 ms/item
