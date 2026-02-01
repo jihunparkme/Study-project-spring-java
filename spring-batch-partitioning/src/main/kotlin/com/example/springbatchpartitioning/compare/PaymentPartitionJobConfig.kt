@@ -38,10 +38,6 @@ class PaymentPartitionJobConfig(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    companion object {
-        private const val CHUNK_SIZE = 1_000
-    }
-
     // 1. Job 설정
     @Bean
     fun paymentPartitionJob(
@@ -118,7 +114,7 @@ class PaymentPartitionJobConfig(
         return MongoCursorItemReaderBuilder<PaymentLedger>()
             .name("paymentReader")
             .template(mongoTemplate)
-            .collection("payment_ledger")
+            .collection(LEDGER_COLLECTION)
             .targetType(PaymentLedger::class.java)
             .query(query)
             .sorts(mapOf("orderNumber" to Sort.Direction.ASC))
@@ -149,12 +145,18 @@ class PaymentPartitionJobConfig(
         val bulkOps = mongoTemplate.bulkOps(
             BulkOperations.BulkMode.UNORDERED,
             PaymentLedger::class.java,
-            "payment_ledger_backup"
+            LEDGER_BACKUP_COLLECTION
         )
 
         bulkOps.insert(items.toList())
 
         val result = bulkOps.execute()
         log.info(">>> [Bulk Write] Inserted: ${result.insertedCount}, Chunk Size: ${items.size()}")
+    }
+
+    companion object {
+        private const val CHUNK_SIZE = 1_000
+        private const val LEDGER_COLLECTION = "payment_ledger"
+        private const val LEDGER_BACKUP_COLLECTION = "payment_ledger_backup"
     }
 }
