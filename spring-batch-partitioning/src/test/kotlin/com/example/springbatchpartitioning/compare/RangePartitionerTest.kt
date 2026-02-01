@@ -19,22 +19,19 @@ class RangePartitionerTest {
         val result = partitioner.partition(0)
 
         // then
-        // 1. 파티션 개수 검증 (10000 / 1000 = 10)
         assertThat(result).hasSize(10)
 
-        // 2. 첫 번째 파티션 범위 검증 (0 ~ 999)
         val firstContext = result["partition0"]
-        assertThat(firstContext?.getInt("fromIndex")).isEqualTo(0)
-        assertThat(firstContext?.getInt("toIndex")).isEqualTo(999)
+        assertThat(firstContext?.getInt("fromIndex")).isEqualTo(1)
+        assertThat(firstContext?.getInt("toIndex")).isEqualTo(1000)
 
-        // 3. 마지막 파티션 범위 검증 (9000 ~ 9999)
         val lastContext = result["partition9"]
-        assertThat(lastContext?.getInt("fromIndex")).isEqualTo(9000)
-        assertThat(lastContext?.getInt("toIndex")).isEqualTo(9999)
+        assertThat(lastContext?.getInt("fromIndex")).isEqualTo(9001)
+        assertThat(lastContext?.getInt("toIndex")).isEqualTo(10000)
     }
 
     @Test
-    @DisplayName("나머지가 발생하는 경우 마지막 파티션의 끝값은 totalAmount - 1 이어야 한다")
+    @DisplayName("나머지가 발생하는 경우 마지막 파티션의 끝값은 totalAmount 이어야 한다")
     fun partitionRemainderTest() {
         // given
         val totalAmount = 10500
@@ -44,13 +41,11 @@ class RangePartitionerTest {
         // when
         val result = partitioner.partition(0)
 
-        // then
-        // 1. 파티션 개수 검증 (10000까지 10개 + 남은 500에 대해 1개 = 총 11개)
+        // thenR
         assertThat(result).hasSize(11)
 
-        // 2. 마지막 파티션(11번째) 범위 검증 (10000 ~ 10499)
         val lastContext = result["partition10"]
-        assertThat(lastContext?.getInt("fromIndex")).isEqualTo(10000)
-        assertThat(lastContext?.getInt("toIndex")).isEqualTo(10499) // totalAmount - 1
+        assertThat(lastContext?.getInt("fromIndex")).isEqualTo(10001)
+        assertThat(lastContext?.getInt("toIndex")).isEqualTo(10500)
     }
 }
