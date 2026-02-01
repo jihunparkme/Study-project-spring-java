@@ -32,10 +32,6 @@ class PaymentBasicConfig(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    companion object {
-        private const val CHUNK_SIZE = 1_000
-    }
-
     @Bean
     fun simplePaymentJob(simpleStep: Step): Job =
         JobBuilder("simplePaymentJob", jobRepository)
@@ -72,7 +68,7 @@ class PaymentBasicConfig(
         return MongoItemReaderBuilder<PaymentLedger>()
             .name("simpleReader")
             .template(mongoTemplate)
-            .collection("payment_ledger")
+            .collection(LEDGER_COLLECTION)
             .targetType(PaymentLedger::class.java)
             .query(query)
             .sorts(mapOf("orderNumber" to Sort.Direction.ASC))
@@ -90,6 +86,12 @@ class PaymentBasicConfig(
     fun simpleWriter(): MongoItemWriter<PaymentLedger> =
         MongoItemWriter<PaymentLedger>().apply {
             setTemplate(mongoTemplate)
-            setCollection("payment_ledger_backup")
+            setCollection(LEDGER_BACKUP_COLLECTION)
         }
+
+    companion object {
+        private const val CHUNK_SIZE = 1_000
+        private const val LEDGER_COLLECTION = "payment_ledger"
+        private const val LEDGER_BACKUP_COLLECTION = "payment_ledger_backup"
+    }
 }
