@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -43,10 +44,12 @@ class PaymentPartitionJobConfig(
 
     // 1. Job 설정
     @Bean
-    fun paymentPartitionJob(managerStep: Step): Job {
+    fun paymentPartitionJob(
+        paymentManagerStep: Step
+    ): Job {
         return JobBuilder("paymentPartitionJob", jobRepository)
             .incrementer(RunIdIncrementer())
-            .start(managerStep)
+            .start(paymentManagerStep)
             .build()
     }
 
@@ -54,20 +57,22 @@ class PaymentPartitionJobConfig(
     @Bean
     fun paymentManagerStep(
         partitionHandler: PartitionHandler,
-        partitioner: Partitioner,
+        paymentPartitioner: Partitioner,
     ): Step {
         return StepBuilder("paymentManagerStep", jobRepository)
-            .partitioner("paymentWorkerStep", partitioner)
+            .partitioner("paymentPartitioner", paymentPartitioner)
             .partitionHandler(partitionHandler)
             .build()
     }
 
     // 3. PartitionHandler 설정 (스레드 풀 및 실행 스텝 연결)
     @Bean
-    fun paymentPartitionHandler(workerStep: Step): PartitionHandler {
+    fun paymentPartitionHandler(
+        paymentWorkerStep: Step
+    ): PartitionHandler {
         val handler = TaskExecutorPartitionHandler()
         handler.setTaskExecutor(paymentBatchTaskExecutor()) // 스레드 풀 주입
-        handler.step = workerStep
+        handler.step = paymentWorkerStep
         handler.gridSize = 6 // 동시에 실행할 최대 스레드 수
         return handler
     }
@@ -103,16 +108,20 @@ class PaymentPartitionJobConfig(
         @Value("#{stepExecutionContext['fromIndex']}") fromIndex: Int,
         @Value("#{stepExecutionContext['toIndex']}") toIndex: Int
     ): MongoCursorItemReader<PaymentLedger> {
+        val query = Query().apply {
+            addCriteria(
+                Criteria.where("orderNumber").gte(fromIndex).lte(toIndex)
+            )
+        }
+        log.info(">>> [Reader Query] 파티션 범위: $fromIndex ~ $toIndex, 쿼리내용: $query")
+
         return MongoCursorItemReaderBuilder<PaymentLedger>()
             .name("paymentReader")
             .template(mongoTemplate)
             .collection("payment_ledger")
             .targetType(PaymentLedger::class.java)
-            .query(Query().apply {
-                addCriteria(
-                    Criteria.where("orderNumber").gte(fromIndex).lte(toIndex)
-                )
-            })
+            .query(query)
+            .sorts(mapOf("orderNumber" to Sort.Direction.ASC))
             .build()
     }
 
