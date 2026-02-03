@@ -3,6 +3,7 @@ package com.example.springbatchpartitioning
 import org.springframework.batch.core.partition.support.Partitioner
 import org.springframework.batch.item.ExecutionContext
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class DateRangePartitioner(
     private val startDate: LocalDate,
@@ -10,20 +11,17 @@ class DateRangePartitioner(
 ) : Partitioner {
 
     override fun partition(gridSize: Int): Map<String, ExecutionContext> {
-        val result = mutableMapOf<String, ExecutionContext>()
-        var targetDate = startDate
-        var partitionNumber = 0
+        val daysBetween = ChronoUnit.DAYS.between(
+            startDate,
+            endDate.plusDays(1)
+        )
 
-        while (!targetDate.isAfter(endDate)) {
-            val context = ExecutionContext()
-            context.putString("targetDate", targetDate.toString())
-
-            result["partition_$partitionNumber"] = context
-
-            targetDate = targetDate.plusDays(1)
-            partitionNumber++
+        return (0 until daysBetween).associate { i ->
+            val targetDate = startDate.plusDays(i)
+            val context = ExecutionContext().apply {
+                putString("targetDate", targetDate.toString())
+            }
+            "partition_$i" to context
         }
-
-        return result
     }
 }
