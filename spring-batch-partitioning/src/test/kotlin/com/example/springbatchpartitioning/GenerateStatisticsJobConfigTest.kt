@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import kotlin.test.Test
 
 @SpringBatchTest
-@SpringBootTest(classes = [DatePartitionJobConfig::class, TestBatchConfig::class])
-class DatePartitionJobConfigTest {
+@SpringBootTest(classes = [GenerateStatisticsJobConfig::class, TestBatchConfig::class])
+class GenerateStatisticsJobConfigTest {
 
     @Autowired
     private lateinit var jobLauncherTestUtils: JobLauncherTestUtils

@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Configuration
-class DatePartitionJobConfig(
+class GenerateStatisticsJobConfig(
     private val jobRepository: JobRepository,
     private val transactionManager: PlatformTransactionManager
 ) {
