@@ -38,10 +38,10 @@ class GenerateStatisticsJobConfig(
 
     // 1. Job 설정
     @Bean
-    fun datePartitionJob(managerStep: Step): Job =
-        JobBuilder("datePartitionJob", jobRepository)
+    fun generateStatisticsJob(generateStatisticsStep: Step): Job =
+        JobBuilder("generateStatisticsJob", jobRepository)
             .incrementer(RunIdIncrementer())
-            .start(managerStep)
+            .start(generateStatisticsStep)
             .build()
 
     // 2. Manager Step (Master)
